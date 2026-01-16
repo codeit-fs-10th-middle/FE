@@ -1,73 +1,44 @@
-// src/components/molecules/InputPassword/InputPassword.jsx
+'use client';
 
-"use client";
-
-import { Input } from "../../atoms/Input";
-import { Button } from "../../atoms/Button";
-import styles from "./InputPassword.module.css";
-import PropTypes from "prop-types";
-import Image from "next/image";
+import Input from '../../atoms/Input/Input';
+import styles from './InputPassword.module.css';
+import Image from 'next/image';
+import EyeIcon from '../../../public/assets/icons/ic_eye.svg';
+import EyeSlashIcon from '../../../public/assets/icons/ic_eye_slash.svg';
+import Button from '../../atoms/Button/Button';
+import Label from '../../atoms/Label/Label';   
+import { useState } from 'react';
 
 export default function InputPassword({ 
+    label, 
     placeholder, 
     value, 
     onChange, 
-    onShowPassword, 
-    onHidePassword, 
-    className 
+    className,
+    type,
+    disabled,
+    error,
+    required, id 
 }) {
+    const [showPassword, setShowPassword] = useState(false);
     return (
         <div 
-            className={`${styles.inputPassword} ${className}`}
+            className={`${styles.inputLabel} ${className}`}
         >
+            <Label className={styles.label}>{label}</Label>
             <Input 
-                className={styles.input} 
-                type="password" 
+                type={showPassword ? 'text' : 'password'} 
                 placeholder={placeholder} 
                 value={value} 
                 onChange={onChange} 
+                className={`${styles.input} ${className} ${error ? styles.error : ''}`}
+                disabled={disabled}
+                required={required}
             />
-            <Button 
-                className={styles.button}
-                onClick={onShowPassword}
-            >
-                <Image src="/assets/icons/ic_eye_on.svg" 
-                    alt="eye-on" className={styles.iconEyeOn} 
-                    width={20} 
-                    height={20} 
-                />
+            <Button className={styles.button} onClick={() => setShowPassword(!showPassword)}>
+                <Image src={showPassword ? EyeIcon : EyeSlashIcon} alt="show password" width={20} height={20} className={styles.iconEye} />
             </Button>
-            <Button 
-                className={styles.button} 
-                onClick={onHidePassword}
-            >
-                <Image 
-                    src="/assets/icons/ic_eye_off.svg" 
-                    alt="eye-off" 
-                    className={styles.iconEyeOff} 
-                    width={20} 
-                    height={20} 
-                />
-            </Button>
+            {error && <p className={styles.errorMessage}>{error}</p>}
         </div>
     );
 }
-
-InputPassword.propTypes = {
-    placeholder: PropTypes.string.isRequired,
-    value: PropTypes.string.isRequired,
-    onChange: PropTypes.func.isRequired,
-    className: PropTypes.string,
-    onShowPassword: PropTypes.func.isRequired,
-    onHidePassword: PropTypes.func.isRequired,
-};
-
-InputPassword.defaultProps = {
-    placeholder: "Password",
-    value: "",
-    onChange: () => {},
-    className: "",
-    onShowPassword: () => {},
-    onHidePassword: () => {},
-};
-
