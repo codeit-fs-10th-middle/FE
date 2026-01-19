@@ -12,22 +12,12 @@ export default function CardSeller({
     description = '우리집 앞마당 포토카드입니다. 우리집 앞마당 포토카드입니다. 우리집 앞마당 포토카드입니다.',
     price = '4 P',
     remaining = '2 / 5',
-    quantity = 2,
-    onQuantityChange,
-    totalPrice = '8 P (2장)',
-    onPurchase,
+    secondRarity = 'RARE',
+    secondCategory = '풍경',
+    secondDescription = '푸릇푸릇한 여름 풍경, 눈 많이 내린 겨울 풍경 사진에 관심이 많습니다.',
+    onEdit,
+    onTakeDown,
 }) {
-    const handleDecrease = () => {
-        if (quantity > 1 && onQuantityChange) {
-            onQuantityChange(quantity - 1);
-        }
-    };
-
-    const handleIncrease = () => {
-        if (onQuantityChange) {
-            onQuantityChange(quantity + 1);
-        }
-    };
 
     return (
         <div className={styles.cardSellerContainer}>
@@ -57,38 +47,34 @@ export default function CardSeller({
                     </div>
                 </div>
 
+                {/* Exchange Wish Info */}
+                <div className={styles.exchangeWishBox}>
+                    <Image src="/assets/icons/ic_refresh.svg" alt="exchange" width={28} height={28} />
+                    <span className={styles.exchangeWishText}>교환 희망 정보</span>
+                </div>
+
                 <div className={styles.divider}></div>
 
-                {/* Purchase Quantity */}
-                <div className={styles.quantitySection}>
-                    <Label>구매수량</Label>
-                    <div className={styles.quantitySelector}>
-                        <Button 
-                            className={styles.quantityButton} 
-                            onClick={handleDecrease}
-                            disabled={quantity <= 1}
-                        >
-                            <Image src="/assets/icons/ic_minus.svg" alt="decrease" width={20} height={20} />
-                        </Button>
-                        <div className={styles.quantityValue}>{quantity}</div>
-                        <Button 
-                            className={styles.quantityButton} 
-                            onClick={handleIncrease}
-                        >
-                            <Image src="/assets/icons/ic_plus.svg" alt="increase" width={20} height={20} />
-                        </Button>
+                {/* Second Header */}
+                <div className={styles.header}>
+                    <div className={styles.headerLeft}>
+                        <span className={styles.secondRarity}>{secondRarity}</span>
+                        <span className={styles.separator}>|</span>
+                        <span className={styles.category}>{secondCategory}</span>
                     </div>
                 </div>
 
-                {/* Total Price */}
-                <div className={styles.totalPriceSection}>
-                    <Label>총 가격</Label>
-                    <div className={styles.totalPriceValue}>{totalPrice}</div>
-                </div>
+                {/* Second Description */}
+                <div className={styles.description}>{secondDescription}</div>
 
-                {/* Purchase Button */}
-                <Button className={styles.purchaseButton} onClick={onPurchase}>
-                    포토카드 판매하기
+                <div className={styles.divider}></div>
+
+                {/* Action Buttons */}
+                <Button className={styles.editButton} onClick={onEdit}>
+                    수정하기
+                </Button>
+                <Button className={styles.takeDownButton} onClick={onTakeDown}>
+                    판매 내리기
                 </Button>
             </div>
         </div>    

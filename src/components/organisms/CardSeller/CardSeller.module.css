@@ -86,67 +86,32 @@
     background-color: rgba(255, 255, 255, 0.12);
 }
 
-/* Quantity Section */
-.quantitySection {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.quantitySelector {
+/* Exchange Wish Info */
+.exchangeWishBox {
     display: flex;
     align-items: center;
-    gap: 0;
-    border: 1px solid #ffffff;
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.quantityButton {
+    gap: 12px;
+    padding: 16px;
+    border: 1px dashed #a855f7;
+    border-radius: 8px;
     background-color: transparent;
-    border: none;
-    padding: 8px 12px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s;
 }
 
-.quantityButton:hover:not(:disabled) {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-.quantityButton:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.quantityValue {
-    color: #ffffff;
-    font-size: 16px;
-    padding: 8px 16px;
-    min-width: 40px;
-    text-align: center;
-    border-left: 1px solid rgba(255, 255, 255, 0.3);
-    border-right: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-/* Total Price Section */
-.totalPriceSection {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.totalPriceValue {
+.exchangeWishText {
     color: #ffffff;
     font-size: 16px;
     font-weight: 500;
 }
 
-/* Purchase Button */
-.sellButton {
+/* Second Rarity */
+.secondRarity {
+    color: #60a5fa;
+    font-weight: 700;
+    font-size: 18px;
+}
+
+/* Action Buttons */
+.editButton {
     width: 100%;
     background-color: #FFD700;
     color: #000000;
@@ -159,11 +124,34 @@
     transition: background-color 0.2s, transform 0.1s;
 }
 
-.sellButton:hover {
+.editButton:hover {
     background-color: #FFC700;
     transform: translateY(-1px);
 }
 
-.sellButton:active {
+.editButton:active {
+    transform: translateY(0);
+}
+
+.takeDownButton {
+    width: 100%;
+    background-color: transparent;
+    color: #ffffff;
+    border: 1px solid #ffffff;
+    border-radius: 8px;
+    padding: 16px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    margin-top: 12px;
+}
+
+.takeDownButton:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+.takeDownButton:active {
     transform: translateY(0);
 }
