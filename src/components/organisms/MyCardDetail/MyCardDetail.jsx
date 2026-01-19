@@ -110,13 +110,12 @@ export default function MyCardDetail({
         <div className={styles.priceInputWrapper}>
           <div className={styles.priceInputContainer}>
             <InputLabel
-              label=""
+              label="P"
               placeholder="숫자만 입력"
               value={priceValue}
               onChange={handlePriceChange}
               className={styles.priceInputLabel}
             />
-            <Label className={styles.priceUnit}>P</Label>
           </div>
         </div>
       </div>
