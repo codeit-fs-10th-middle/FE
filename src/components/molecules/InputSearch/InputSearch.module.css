@@ -26,4 +26,10 @@
         color: #666;
         cursor: not-allowed;
     }
+.error {
+    border-color: #ffffff;
+}
+.errorMessage {
+    font-size: 14px;
+    color: #ffffff;
 }
