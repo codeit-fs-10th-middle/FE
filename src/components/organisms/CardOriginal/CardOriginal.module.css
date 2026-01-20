@@ -106,6 +106,12 @@
   color: #ffffff;
 }
 
+.infoValue .outof {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 200;
+}
+
 .footer {
   display: flex;
   justify-content: center;

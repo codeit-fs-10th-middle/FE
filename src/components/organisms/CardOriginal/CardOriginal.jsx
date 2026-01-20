@@ -1,14 +1,25 @@
 'use client';
 import styles from './CardOriginal.module.css';
 import Image from 'next/image';
+import Label from '../../atoms/Label/Label';
+import logo from '../../../../public/assets/icons/logos/logo.svg';
+import photoCard from '../../../../public/assets/products/photo-card.svg';
 
-export default function CardOriginal() {
+export default function CardOriginal({
+  rarity = 'COMMON',
+  category = '풍경',
+  owner = '미쓰손',
+  description = '우리집 앞마당 우리집 앞마당 우리집 ...',
+  price = '4 P',
+  remaining = 2,
+  outof = 5,
+}) {
   return (
     <div className={styles.cardOriginal}>
       {/* Image Section */}
       <div className={styles.imageContainer}>
         <Image
-          src="/assets/products/photo-card.svg"
+          src={photoCard}
           alt="Photo Card"
           width={400}
           height={400}
@@ -19,16 +30,16 @@ export default function CardOriginal() {
       {/* Content Section */}
       <div className={styles.content}>
         {/* Title */}
-        <div className={styles.title}>우리집 앞마당 우리집 앞마당 우리집 ...</div>
+        <div className={styles.title}>{description}</div>
 
         {/* Metadata */}
         <div className={styles.metadata}>
           <div className={styles.metadataLeft}>
-            <span className={styles.rarity}>COMMON</span>
-            <span className={styles.separator}>|</span>
-            <span className={styles.category}>풍경</span>
+            <Label className={styles.rarity}>{rarity}</Label>
+            <Label className={styles.separator}>|</Label>
+            <Label className={styles.category}>{category}</Label>
           </div>
-          <span className={styles.owner}>미쓰손</span>
+          <Label className={styles.owner}>{owner}</Label>
         </div>
 
         {/* Divider */}
@@ -37,12 +48,15 @@ export default function CardOriginal() {
         {/* Price and Remaining */}
         <div className={styles.infoSection}>
           <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>가격</span>
-            <span className={styles.infoValue}>4 P</span>
+            <Label className={styles.infoLabel}>가격</Label>
+            <Label className={styles.infoValue}>{price}</Label>
           </div>
           <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>잔여</span>
-            <span className={styles.infoValue}>2 / 5</span>
+            <Label className={styles.infoLabel}>잔여</Label>
+            <div className={styles.infoValue}>
+                <Label className={styles.remaining}>{remaining}</Label>
+                <Label className={styles.outof}> / {outof}</Label>
+            </div>
           </div>
         </div>
       </div>
@@ -50,7 +64,7 @@ export default function CardOriginal() {
       {/* Footer Logo */}
       <div className={styles.footer}>
         <span className={styles.logo}>
-          최애<span className={styles.logoAccent}>의</span>포토
+          <Image src={logo} alt="Logo" width={100} height={100} className={styles.logo} />
         </span>
       </div>
     </div>
