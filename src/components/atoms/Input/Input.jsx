@@ -12,10 +12,13 @@ export default function Input({
     required, 
     id 
 }) {
+    // className이 전달되면 기본 스타일을 적용하지 않음
+    const resolvedClassName = className ? className : (styles.input ?? '');
+
     return (
         <input
             id={id}
-            className={`${styles.input ?? ''} ${className ?? ''}`.trim()}
+            className={resolvedClassName}
             type={type}
             placeholder={placeholder}
             value={value}
