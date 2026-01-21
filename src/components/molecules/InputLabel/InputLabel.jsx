@@ -10,20 +10,27 @@ export default function InputLabel({
     placeholder, 
     value, 
     onChange, 
-    className 
+    className,
+    type,
+    disabled,
+    error,
+    required, id 
 }) {
     return (
         <div 
             className={`${styles.inputLabel} ${className}`}
         >
-            <Label>{label}</Label>
+            <Label className={styles.label}>{label}</Label>
             <Input 
-                className={styles.input} 
-                type="text" 
+                type={type} 
                 placeholder={placeholder} 
                 value={value} 
                 onChange={onChange} 
+                className={`${styles.input} ${className} ${error ? styles.error : ''}`}
+                disabled={disabled}
+                required={required}
             />
+            {error && <p className={styles.errorMessage}>{error}</p>}
         </div>
     );
 }
