@@ -4,7 +4,7 @@ import styles from './InputSearch.module.css';
 import Input from '../../atoms/Input/Input';
 import Button from '../../atoms/Button/Button';
 import Image from 'next/image';
-import SearchIcon from '../../../public/icons/search.svg';
+import SearchIcon from '../../../public/assets/icons/ic_search.svg';
 
 export default function InputSearch({
     placeholder,
