@@ -1,0 +1,54 @@
+/* Modal.module.css */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px; /* 화면 가장자리 안전 여백 */
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+
+  width: 560px;
+  max-width: calc(100vw - 48px);
+  max-height: calc(100dvh - 48px);
+
+  background: #141414;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+
+  overflow: hidden;
+}
+
+.content {
+  padding: 32px;
+  overflow: auto;
+}
+
+.close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+
+  width: 40px;
+  height: 40px;
+
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  font-size: 24px;
+  cursor: pointer;
+}
