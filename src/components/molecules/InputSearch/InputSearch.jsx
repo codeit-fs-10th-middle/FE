@@ -1,8 +1,5 @@
 'use client';
 
-import Input from '../../atoms/Input/Input';
-import Button from '../../atoms/Button/Button';
-
 export default function InputSearch({
     placeholder,
     value,
@@ -13,30 +10,65 @@ export default function InputSearch({
     required,
     id,
     disabled,
-    icon = <img src="/assets/icons/ic_search.svg" alt="search" width={20} height={20} />
 }) {
     return (
-        <div className={`flex flex-col ${className ?? ''}`}>
-            <div className="relative h-[50px] w-[320px]">
-                <Input 
-                    type="text" 
-                    placeholder={placeholder} 
-                    value={value} 
-                    onChange={onChange}
-                    className="h-full w-full rounded-sm border border-white/40 bg-black px-4 pr-[50px] text-[14px] text-white placeholder:text-white/40 focus:border-white focus:outline-none"
-                    required={required}
+        <div className={className ?? ''}>
+            <div 
+                style={{
+                    position: 'relative',
+                    width: '320px',
+                    height: '50px',
+                    display: 'flex',
+                    alignItems: 'center',
+                }}
+            >
+                <input
                     id={id}
+                    type="text"
+                    placeholder={placeholder}
+                    value={value}
+                    onChange={onChange}
+                    required={required}
                     disabled={disabled}
+                    style={{
+                        width: '100%',
+                        height: '100%',
+                        backgroundColor: '#000',
+                        border: '1px solid rgba(255,255,255,0.4)',
+                        borderRadius: '2px',
+                        padding: '0 50px 0 16px',
+                        fontSize: '14px',
+                        color: '#fff',
+                        outline: 'none',
+                    }}
                 />
-                <Button 
-                    className="absolute right-0 top-0 flex h-full w-[50px] items-center justify-center rounded-r-sm border-l border-white/40 bg-black hover:bg-white/10"
+                <button
+                    type="button"
                     onClick={onClick}
                     disabled={disabled}
+                    style={{
+                        position: 'absolute',
+                        right: '0',
+                        top: '0',
+                        width: '50px',
+                        height: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                    }}
                 >
-                    {icon}
-                </Button>
+                    <img 
+                        src="/assets/icons/ic_search.svg" 
+                        alt="search" 
+                        width={20} 
+                        height={20} 
+                    />
+                </button>
             </div>
-            {error && <p className="mt-1 text-[12px] text-red-400">{error}</p>}
+            {error && <p style={{ marginTop: '4px', fontSize: '12px', color: '#f87171' }}>{error}</p>}
         </div>
     );
 }
