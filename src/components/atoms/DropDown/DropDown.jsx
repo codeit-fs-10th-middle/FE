@@ -4,13 +4,14 @@
 import { useState } from 'react';
 import styles from './DropDown.module.css';
 
-export default function DropDown({ options, value, onChange }) {
+export default function DropDown({ options, value, onChange, style }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className={styles.wrapper}>
       <select
         className={styles.select}
+        style={style}
         value={value}
         onChange={onChange}
         onFocus={() => setIsOpen(true)}
