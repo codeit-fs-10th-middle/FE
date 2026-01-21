@@ -1,13 +1,6 @@
 import './globals.css';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import { Bebas_Neue } from 'next/font/google';
-
-const bebasNeue = Bebas_Neue({
-  weight: '400',
-  subsets: ['latin'],
-  variable: '--font-bebas-neue',
-});
 
 export const metadata = {
   title: '최애의 포토',
