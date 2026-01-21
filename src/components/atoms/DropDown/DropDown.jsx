@@ -1,7 +1,6 @@
 // src/components/atoms/DropDown/DropDown.jsx
 "use client";
 
-import Image from 'next/image';
 import { useState } from 'react';
 import styles from './DropDown.module.css';
 
@@ -26,7 +25,7 @@ export default function DropDown({ options, value, onChange }) {
       </select>
 
       <span className={styles.icon}>
-        <Image
+        <img
           src={isOpen ? '/assets/icons/ic_up.svg' : '/assets/icons/ic_down.svg'}
           alt={isOpen ? 'up' : 'down'}
           width={24}
