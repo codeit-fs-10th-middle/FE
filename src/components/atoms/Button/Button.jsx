@@ -2,9 +2,26 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Styles } from "./Button.module.css";
+import styles from "./Button.module.css";
 
-export default function Button({ children, href }) {
+export default function Button({ children, href, onClick, className, style, disabled, type = "button" }) {
     const router = useRouter();
-    return <button className={Styles.button} onClick={() => router.push(href)}>{children}</button>;
+
+    const handleClick = () => {
+        if (disabled) return;
+        if (onClick) return onClick();
+        if (href) return router.push(href);
+    };
+
+    return (
+        <button
+            type={type}
+            className={`${styles.button ?? ''} ${className ?? ''}`.trim()}
+            onClick={handleClick}
+            style={style}
+            disabled={disabled}
+        >
+            {children}
+        </button>
+    );
 }
