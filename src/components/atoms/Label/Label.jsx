@@ -9,7 +9,7 @@ export default function Label({
 }) {
     return (
         <label 
-            className={`${styles.label} ${className || ''}`.trim()} 
+            className={`${styles.label ?? ''} ${className ?? ''}`.trim()} 
             style={style}
         >
             {children}

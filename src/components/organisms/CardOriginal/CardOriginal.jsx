@@ -2,8 +2,6 @@
 import styles from './CardOriginal.module.css';
 import Image from 'next/image';
 import Label from '../../atoms/Label/Label';
-import logo from '../../../../public/assets/icons/logos/logo.svg';
-import photoCard from '../../../../public/assets/products/photo-card.svg';
 
 export default function CardOriginal({
   rarity = 'COMMON',
@@ -13,13 +11,14 @@ export default function CardOriginal({
   price = '4 P',
   remaining = 2,
   outof = 5,
+  imageSrc = '/assets/products/photo-card.svg',
 }) {
   return (
     <div className={styles.cardOriginal}>
       {/* Image Section */}
       <div className={styles.imageContainer}>
         <Image
-          src={photoCard}
+          src={imageSrc}
           alt="Photo Card"
           width={400}
           height={400}
@@ -64,7 +63,7 @@ export default function CardOriginal({
       {/* Footer Logo */}
       <div className={styles.footer}>
         <span className={styles.logo}>
-          <Image src={logo} alt="Logo" width={100} height={100} className={styles.logo} />
+          <Image src="/assets/logos/logo.svg" alt="Logo" width={100} height={100} className={styles.logo} />
         </span>
       </div>
     </div>
