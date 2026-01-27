@@ -2,7 +2,7 @@
 import styles from './CardExchange.module.css';
 import Image from 'next/image';
 import Label from '../../atoms/Label/Label';
-import Button from '../../atoms/Button/Button';
+import Button from '../../atoms/Button/ButtonSecondary';
 
 export default function CardExchange({
   title,

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Title from '@/components/atoms/Title/Title';
-import Button from '@/components/atoms/Button/Button';
+import Button from '@/components/atoms/Button/ButtonSecondary';
 import DropDown from '@/components/atoms/DropDown/DropDown';
 import InputSearch from '@/components/molecules/InputSearch/InputSearch';
 
@@ -74,7 +74,14 @@ export default function SubHeader() {
           </Button>
         </div>
 
-        <div style={{ marginTop: '12px', marginBottom: '6px', width: '100%', borderTop: '2px solid #EEEEEE' }} />
+        <div
+          style={{
+            marginTop: '12px',
+            marginBottom: '6px',
+            width: '100%',
+            borderTop: '2px solid #EEEEEE',
+          }}
+        />
 
         <div className="mt-5 flex items-center justify-between">
           <div className="flex items-center">
@@ -86,21 +93,33 @@ export default function SubHeader() {
             />
 
             <div style={{ marginLeft: '30px', width: '120px' }}>
-              <DropDown options={rarityOptions} value={rarity} onChange={(e) => setRarity(e.target.value)} />
+              <DropDown
+                options={rarityOptions}
+                value={rarity}
+                onChange={(e) => setRarity(e.target.value)}
+              />
             </div>
             <div className="w-[120px]">
-              <DropDown options={genreOptions} value={genre} onChange={(e) => setGenre(e.target.value)} />
+              <DropDown
+                options={genreOptions}
+                value={genre}
+                onChange={(e) => setGenre(e.target.value)}
+              />
             </div>
             <div className="w-[140px]">
-              <DropDown options={soldoutOptions} value={soldout} onChange={(e) => setSoldout(e.target.value)} />
+              <DropDown
+                options={soldoutOptions}
+                value={soldout}
+                onChange={(e) => setSoldout(e.target.value)}
+              />
             </div>
           </div>
 
           <div style={{ width: '160px' }}>
-            <DropDown 
-              options={sortOptions} 
-              value={sort} 
-              onChange={(e) => setSort(e.target.value)} 
+            <DropDown
+              options={sortOptions}
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
               style={{ border: '2px solid #DDDDDD' }}
             />
           </div>
@@ -109,4 +128,3 @@ export default function SubHeader() {
     </section>
   );
 }
-
