@@ -1,1 +1,22 @@
+/* src/app/globals.css
+// created by Myeonghwan Kim
+// font-face 추가 added by Taeyoung, 1/21/2026 */
+
 @import 'tailwindcss';
+
+@font-face {
+  font-family: 'BR B';
+  src: url('/fonts/BR-B.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}

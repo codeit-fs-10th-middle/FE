@@ -1,0 +1,94 @@
+/* ===== common base ===== */
+.base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  border-radius: 2px;
+  border-style: solid;
+
+  font-weight: 700;
+  line-height: 1;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.default {
+  cursor: pointer;
+}
+
+.disabled {
+  cursor: not-allowed;
+}
+
+/* ===== thickness ===== */
+.th_thick {
+  background: #efff04;
+  color: #000;
+  border-width: 2px;
+  border-color: #efff04;
+  padding: 25px;
+}
+
+.th_thin {
+  background: #efff04;
+  color: #000;
+  border-width: 1px;
+  border-color: #efff04;
+  padding: 17px;
+}
+
+/* disabled(피그마 기준) */
+.th_thick.disabled,
+.th_thin.disabled {
+  background: #9ca3af; /* gray400 */
+  border-color: #9ca3af;
+  color: #111;
+}
+
+/* ===== size (피그마 fixed) ===== */
+.size_l {
+  width: 440px;
+  height: 80px;
+  font-size: 16px;
+}
+
+.size_m {
+  width: 342px;
+  height: 75px;
+  font-size: 16px;
+}
+
+.size_s {
+  width: 345px;
+  height: 75px;
+  font-size: 16px;
+}
+
+.size_xs {
+  width: 150px;
+  height: 40px;
+  font-size: 14px;
+}
+
+/* thin일 때 다른 fixed 값 있으면 오버라이드 */
+.th_thin.size_l {
+  width: 520px;
+  height: 60px;
+}
+
+.th_thin.size_m {
+  width: 440px;
+  height: 55px;
+}
+
+.th_thin.size_s {
+  width: 345px;
+  height: 55px;
+}
+
+.th_thin.size_xs {
+  width: 150px;
+  height: 40px;
+}
