@@ -143,16 +143,12 @@ export default function MarketplaceCardPurchasePage() {
       <div className={styles.contentWrapper}>
         {/* Desktop Layout: Left Navigation + Right Content */}
         <div className={styles.desktopLayout}>
-          {/* Left Sidebar - Navigation */}
-          <div className={styles.leftSidebar}>
-            <Link href="/marketplace" className={styles.marketplaceLink}>
-              <Image src="/assets/icons/ic_back.svg" alt="뒤로가기" width={22} height={22} />
-              <span>마켓플레이스</span>
-            </Link>
-          </div>
-
           {/* Right Main Content */}
           <div className={styles.rightMainContent}>
+            {/* 1. Marketplace link above Card Title (desktop) */}
+            <Link href="/marketplace" className={styles.marketplaceLinkAboveTitle}>
+              <span>마켓플레이스</span>
+            </Link>
             {/* 2. Card Title Box "우리집 앞마당" */}
             <div className={styles.cardTitleBox}>
           <h1
@@ -204,7 +200,7 @@ export default function MarketplaceCardPurchasePage() {
           </div>
         </div>
 
-        {/* 5. "교환 희망 정보" Title */}
+        {/* 5. "교환 희망 정보" Title + "포토카드 교환하기" button on right (desktop) */}
         <div className={styles.spacing50}></div>
         <div className={styles.exchangeTitleBox}>
           <h1
@@ -221,6 +217,26 @@ export default function MarketplaceCardPurchasePage() {
           >
             교환 희망 정보
           </h1>
+          <div className={styles.desktopExchangeButton}>
+            <Button
+              onClick={handleExchange}
+              style={{
+                width: '100%',
+                backgroundColor: '#EFFF04',
+                color: '#000000',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '16px',
+                fontSize: '18px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                fontFamily: "'Noto Sans KR', sans-serif",
+                whiteSpace: 'nowrap',
+              }}
+            >
+              포토카드 교환하기
+            </Button>
+          </div>
         </div>
 
         {/* Divider */}

@@ -61,6 +61,25 @@
   min-width: 0;
 }
 
+/* Marketplace link above Card Title (desktop) */
+.marketplaceLinkAboveTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ffffff;
+  text-decoration: none;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+  margin-bottom: 16px;
+}
+
+.marketplaceLinkAboveTitle:hover {
+  opacity: 0.7;
+}
+
 /* 1. Page Title "마켓플레이스" - Hidden on desktop */
 .pageTitle {
   display: none;
@@ -145,6 +164,13 @@
   border-bottom: 1px solid #D3D3D3;
 }
 
+.desktopExchangeButton {
+  flex-shrink: 0;
+  /* Match width of .rightColumn (mainContentArea - 820px - 40px gap) so button matches CardBuyer purchase button */
+  width: calc(100% - 860px);
+  min-width: 200px;
+}
+
 .exchangeTitle {
   margin: 0;
   padding: 0;
@@ -211,7 +237,7 @@
 .proposedExchangeList {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 40px;
   margin-top: 24px;
   justify-items: start;
@@ -224,9 +250,13 @@
 }
 
 .proposedExchangeItem :global(.myCardExchangeCancel) {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
+  width: 342px;
+  max-width: 342px;
+  min-width: 342px;
+  height: 517px;
+  min-height: 517px;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 /* Mobile Header (499px 이하) */
@@ -255,6 +285,26 @@
 
 .mobileExchangeButton {
   display: none;
+}
+
+/* Tablet Responsive Styles (500px–1199px) */
+@media (min-width: 500px) and (max-width: 1199px) {
+  .leftColumn {
+    flex: 0 0 342px;
+    width: 342px;
+  }
+
+  .cardImage {
+    width: 342px;
+    height: 256px;
+    object-fit: contain;
+  }
+
+  /* Match exchange button width to rightColumn (342 + 40 gap) so it aligns with "포토카드 구매하기" */
+  .desktopExchangeButton {
+    width: calc(100% - 382px);
+    min-width: 200px;
+  }
 }
 
 /* Mobile Responsive Styles (499px 이하) */
@@ -298,6 +348,16 @@
 
   /* Hide Left Sidebar on Mobile */
   .leftSidebar {
+    display: none;
+  }
+
+  /* Hide marketplace link above title on mobile (header shows title) */
+  .marketplaceLinkAboveTitle {
+    display: none;
+  }
+
+  /* Hide desktop exchange button; mobile uses .mobileExchangeButton */
+  .desktopExchangeButton {
     display: none;
   }
 
@@ -423,5 +483,13 @@
     gap: 16px;
     padding: 0 20px;
     box-sizing: border-box;
+  }
+
+  .proposedExchangeItem :global(.myCardExchangeCancel) {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    height: auto;
+    min-height: 0;
   }
 }
