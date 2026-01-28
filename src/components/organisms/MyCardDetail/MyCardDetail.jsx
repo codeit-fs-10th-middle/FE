@@ -3,7 +3,7 @@
 import styles from './MyCardDetail.module.css';
 import Label from '../../atoms/Label/Label';
 import InputLabel from '../../molecules/InputLabel/InputLabel';
-import Button from '../../atoms/Button/Button';
+import Button from '../../atoms/Button/ButtonSecondary';
 import Image from 'next/image';
 import { useState } from 'react';
 
@@ -80,10 +80,10 @@ export default function MyCardDetail({
         <div className={styles.quantityRightGroup}>
           <div className={styles.quantityControl}>
             <Button className={styles.iconButton} onClick={handleMinus} disabled={quantity <= 1}>
-              <Image 
-                src="/assets/icons/ic_minus.svg" 
-                alt="minus" 
-                width={20} 
+              <Image
+                src="/assets/icons/ic_minus.svg"
+                alt="minus"
+                width={20}
                 height={20}
                 className={styles.icon}
               />
@@ -94,10 +94,10 @@ export default function MyCardDetail({
               onClick={handlePlus}
               disabled={quantity >= maxQuantity}
             >
-              <Image 
-                src="/assets/icons/ic_plus.svg" 
-                alt="plus" 
-                width={20} 
+              <Image
+                src="/assets/icons/ic_plus.svg"
+                alt="plus"
+                width={20}
                 height={20}
                 className={styles.icon}
               />
