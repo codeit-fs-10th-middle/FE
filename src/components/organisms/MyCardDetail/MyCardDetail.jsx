@@ -94,10 +94,10 @@ export default function MyCardDetail({
               onClick={handlePlus}
               disabled={quantity >= maxQuantity}
             >
-              <Image 
-                src="/assets/icons/ic_plus.svg" 
-                alt="plus" 
-                width={20} 
+              <Image
+                src="/assets/icons/ic_plus.svg"
+                alt="plus"
+                width={20}
                 height={20}
                 className={styles.icon}
               />

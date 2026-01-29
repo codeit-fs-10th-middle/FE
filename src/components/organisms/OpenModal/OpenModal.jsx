@@ -10,7 +10,6 @@ import { ButtonPrimary, ButtonSecondary, ResponsiveButton } from '@/components/a
 import styles from './OpenModal.module.css';
 
 export default function OpenModal({ open, onClose, cardData, mode = 'edit', onSellSuccess }) {
-  // Extract numeric price from "4 P" format
   const extractPrice = (priceStr) => {
     if (!priceStr) return '';
     const match = priceStr.match(/(\d+)/);
@@ -23,7 +22,6 @@ export default function OpenModal({ open, onClose, cardData, mode = 'edit', onSe
   const [genre, setGenre] = useState(cardData?.genre || '풍경');
   const [description, setDescription] = useState(cardData?.exchangeDescription || '');
 
-  // Update state when cardData changes
   useEffect(() => {
     if (cardData) {
       setQuantity(cardData.initialQuantity || 1);
@@ -50,17 +48,15 @@ export default function OpenModal({ open, onClose, cardData, mode = 'edit', onSe
 
   const handleSave = () => {
     if (mode === 'sell') {
-      // Call onSellSuccess callback to show success modal in parent component
       if (onSellSuccess) {
         onSellSuccess({
           ...cardData,
-          quantity: quantity,
+          quantity,
           rarity: grade,
           title: cardData?.title || '우리집 앞마당',
         });
       }
     } else {
-      // Handle edit logic here
       console.log('Save clicked', { quantity, price, grade, genre, description, mode });
       onClose();
     }
@@ -70,45 +66,27 @@ export default function OpenModal({ open, onClose, cardData, mode = 'edit', onSe
     onClose();
   };
 
-  // Determine title and button text based on mode
   const modalTitle = mode === 'sell' ? '나의 포토카드 판매하기' : '수정하기';
   const saveButtonText = mode === 'sell' ? '판매하기' : '수정하기';
 
   return (
     <Modal open={open} onClose={onClose} size="custom">
       <div className={styles.openModalContainer}>
-        {/* Header with title */}
         <div className={styles.header}>
           <h2 className={styles.modalTitle}>{modalTitle}</h2>
         </div>
 
-        {/* Scrollable content area */}
         <div className={styles.scrollableContent}>
-          {/* Card Title Section */}
           <div className={styles.cardTitleBox}>
-            <h1
-              className={styles.cardTitle}
-              style={{
-                fontFamily: "'Noto Sans KR', sans-serif",
-                fontWeight: 700,
-                fontStyle: 'normal',
-                fontSize: '40px',
-                lineHeight: '100%',
-                color: '#ffffff',
-                margin: 0,
-                paddingBottom: '20px',
-              }}
-            >
-              {cardData?.title || '우리집 앞마당'}
-            </h1>
+            <h1 className={styles.cardTitle}>{cardData?.title || '우리집 앞마당'}</h1>
           </div>
 
           {/* 1. Photo first, then Details below (stacked) */}
           <div className={styles.photoAndDetailsSection}>
             <div className={styles.photoSection}>
               <Image
-                src={cardData?.imageSrc || "/assets/products/photo-card.svg"}
-                alt={cardData?.title || "포토카드"}
+                src={cardData?.imageSrc || '/assets/products/photo-card.svg'}
+                alt={cardData?.title || '포토카드'}
                 width={480}
                 height={360}
                 className={styles.photoImage}
@@ -128,23 +106,8 @@ export default function OpenModal({ open, onClose, cardData, mode = 'edit', onSe
             </div>
           </div>
 
-          {/* Exchange Wish Information Section */}
           <div className={styles.cardTitleBox}>
-            <h1
-              className={styles.cardTitle}
-              style={{
-                fontFamily: "'Noto Sans KR', sans-serif",
-                fontWeight: 700,
-                fontStyle: 'normal',
-                fontSize: '40px',
-                lineHeight: '100%',
-                color: '#ffffff',
-                margin: 0,
-                paddingBottom: '20px',
-              }}
-            >
-              교환 희망 정보
-            </h1>
+            <h1 className={styles.cardTitle}>교환 희망 정보</h1>
           </div>
 
           {/* 2. Grade first, then Genre below (stacked) */}
@@ -152,45 +115,28 @@ export default function OpenModal({ open, onClose, cardData, mode = 'edit', onSe
             <div className={styles.gradeSection}>
               <h3 className={styles.sectionTitle}>등급</h3>
               <DropDown
-                className={styles.gradeDropdown}
                 options={gradeOptions}
                 value={grade}
                 onChange={(e) => setGrade(e.target.value)}
-                wrapperStyle={{ border: '1px solid #ffffff' }}
-                style={{ border: '1px solid #ffffff' }}
               />
             </div>
             <div className={styles.genreSection}>
               <h3 className={styles.sectionTitle}>장르</h3>
               <DropDown
-                className={styles.genreDropdown}
                 options={genreOptions}
                 value={genre}
                 onChange={(e) => setGenre(e.target.value)}
-                wrapperStyle={{ border: '1px solid #ffffff' }}
-                style={{ border: '1px solid #ffffff' }}
               />
             </div>
           </div>
 
-          {/* Exchange Wish Description */}
           <div className={styles.descriptionSection}>
             <h3 className={styles.sectionTitle}>교환 희망 설명</h3>
-            <TextBox
-              label=""
-              value={description}
-              placeholder="--- ---"
-              onChange={setDescription}
-              className={styles.descriptionTextBox}
-              wrapperStyle={{ width: '920px', gap: 0 }}
-              textareaStyle={{ width: '920px' }}
-            />
+            <TextBox value={description} placeholder="--- ---" onChange={setDescription} />
           </div>
 
-          {/* Divider */}
-          <span className={styles.divider}></span>
+          <span className={styles.divider} />
 
-          {/* Action Buttons */}
           <div className={styles.actionButtons}>
             <ResponsiveButton onClick={handleCancel} className={styles.cancelButton}>
               취소

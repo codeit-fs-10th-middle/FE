@@ -13,28 +13,28 @@ const RARITY_COLORS = {
 };
 
 export default function CardBuyer({
-    rarity = 'COMMON',
-    category = '풍경',
-    owner = '미쓰손',
-    description = '우리집 앞마당 포토카드입니다. 우리집 앞마당 포토카드입니다. 우리집 앞마당 포토카드입니다.',
-    price = '4 P',
-    remaining = '2 / 5',
-    quantity = 2,
-    onQuantityChange,
-    totalPrice = '8 P (2장)',
-    onPurchase,
+  rarity = 'COMMON',
+  category = '풍경',
+  owner = '미쓰손',
+  description = '우리집 앞마당 포토카드입니다. 우리집 앞마당 포토카드입니다. 우리집 앞마당 포토카드입니다.',
+  price = '4 P',
+  remaining = '2 / 5',
+  quantity = 2,
+  onQuantityChange,
+  totalPrice = '8 P (2장)',
+  onPurchase,
 }) {
-    const handleDecrease = () => {
-        if (quantity > 1 && onQuantityChange) {
-            onQuantityChange(quantity - 1);
-        }
-    };
+  const handleDecrease = () => {
+    if (quantity > 1 && onQuantityChange) {
+      onQuantityChange(quantity - 1);
+    }
+  };
 
-    const handleIncrease = () => {
-        if (onQuantityChange) {
-            onQuantityChange(quantity + 1);
-        }
-    };
+  const handleIncrease = () => {
+    if (onQuantityChange) {
+      onQuantityChange(quantity + 1);
+    }
+  };
 
     const rarityColor = RARITY_COLORS[rarity] || '#FFD700';
 
@@ -56,22 +56,22 @@ export default function CardBuyer({
                     <span className={styles.owner}>{owner}</span>
                 </div>
 
-                {/* Description */}
-                <div className={styles.description}>{description}</div>
+        {/* Description */}
+        <div className={styles.description}>{description}</div>
 
-                {/* Price and Remaining */}
-                <div className={styles.infoRow}>
-                    <div className={styles.infoItem}>
-                        <Label>가격</Label>
-                        <div className={styles.infoValue}>{price}</div>
-                    </div>
-                    <div className={styles.infoItem}>
-                        <Label>잔여</Label>
-                        <div className={styles.infoValue}>{remaining}</div>
-                    </div>
-                </div>
+        {/* Price and Remaining */}
+        <div className={styles.infoRow}>
+          <div className={styles.infoItem}>
+            <Label>가격</Label>
+            <div className={styles.infoValue}>{price}</div>
+          </div>
+          <div className={styles.infoItem}>
+            <Label>잔여</Label>
+            <div className={styles.infoValue}>{remaining}</div>
+          </div>
+        </div>
 
-                <div className={styles.divider}></div>
+        <div className={styles.divider}></div>
 
                 {/* Purchase Quantity */}
                 <div className={styles.quantitySection}>
@@ -96,11 +96,11 @@ export default function CardBuyer({
                     </div>
                 </div>
 
-                {/* Total Price */}
-                <div className={styles.totalPriceSection}>
-                    <Label>총 가격</Label>
-                    <div className={styles.totalPriceValue}>{totalPrice}</div>
-                </div>
+        {/* Total Price */}
+        <div className={styles.totalPriceSection}>
+          <Label>총 가격</Label>
+          <div className={styles.totalPriceValue}>{totalPrice}</div>
+        </div>
 
                 {/* Purchase Button */}
                 <button type="button" className={styles.purchaseButton} onClick={onPurchase}>
