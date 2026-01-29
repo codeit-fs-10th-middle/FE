@@ -1,5 +1,5 @@
-.cardOriginal {
-  border: 1px solid #222222;
+.myCardExchangeCancel {
+  border: 1px solid #2d2d2d;
   display: flex;
   flex-direction: column;
   background-color: #161616;
@@ -21,7 +21,7 @@
   padding: 30px 30px 10px 30px;
 }
 
-.cardImage {
+.myCardImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -36,13 +36,13 @@
 }
 
 .title {
-  font-size: 20px;
-  font-weight: bold;
+  font-size: 40px;
+  font-weight: 700;
+  font-family: 'Noto Sans KR', sans-serif;
   color: #ffffff;
-  line-height: 1.2;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 .metadata {
@@ -75,6 +75,12 @@
   color: #a4a4a4;
 }
 
+.purchaseInfo {
+  font-size: 16px;
+  font-weight: 400;
+  color: #a4a4a4;
+}
+
 .owner {
   font-size: 16px;
   font-weight: 400;
@@ -89,59 +95,38 @@
   margin: 4px 0;
 }
 
-.infoSection {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.infoRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.infoLabel {
+.proposalMessage {
   font-size: 16px;
   font-weight: 400;
   color: #ffffff;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 8px 0;
 }
 
-.infoValue {
-  font-size: 20px;
-  font-weight: bold;
+.cancelButton {
+  width: 100%;
+  padding: 12px 32px;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid #ffffff;
+  background-color: transparent;
   color: #ffffff;
+  transition: all 0.3s ease;
+  font-family: 'Noto Sans KR', sans-serif;
+  margin-top: 8px;
 }
 
-.infoValue .outof {
-    color: #ffffff;
-    font-size: 16px;
-    font-weight: 200;
+.cancelButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
-.footer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 16px;
-  border-top: 0px solid #2a2a2a;
-}
-
-.logo {
-  padding-bottom: 10px;
-  font-size: 18px;
-  font-weight: 500;
-  color: #ffffff;
-  text-align: center;
-}
-
-.logoAccent {
-  color: #efff04;
-}
-
-/* 모바일(499px 이하): 이미지 150x112, 폰트 축소, 패딩 최소화해 2개 한 줄에 */
+/* 모바일(499px 이하): 내가 제시한 교환 목록 등 – MyCard 기준, 이미지 170x150, 폰트·패딩 축소 */
 @media (max-width: 499px) {
-  .cardOriginal {
+  .myCardExchangeCancel {
     max-width: 100%;
   }
 
@@ -155,7 +140,7 @@
     margin: 0 auto;
   }
 
-  .cardImage {
+  .myCardImage {
     width: 170px;
     height: 150px;
     object-fit: cover;
@@ -178,20 +163,19 @@
   .rarity,
   .separator,
   .category,
+  .purchaseInfo,
   .owner {
     font-size: 10px;
   }
 
-  .infoLabel,
-  .infoValue {
+  .proposalMessage {
     font-size: 10px;
+    margin: 4px 0;
   }
 
-  .infoValue .outof {
-    font-size: 10px;
-  }
-
-  .footer {
-    display: none;
+  .cancelButton {
+    padding: 8px 16px;
+    font-size: 12px;
+    margin-top: 4px;
   }
 }
