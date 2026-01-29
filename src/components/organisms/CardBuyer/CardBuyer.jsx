@@ -3,7 +3,14 @@
 import styles from './CardBuyer.module.css';
 import Image from 'next/image';
 import Label from '../../atoms/Label/Label';
-import Button from '../../atoms/Button/ButtonSecondary';
+import { ButtonBase } from '@/components/atoms/Button';
+
+const RARITY_COLORS = {
+    COMMON: '#FFD700',
+    RARE: '#60a5fa',
+    'SUPER RARE': '#9D4EDD',
+    LEGENDARY: '#FF1744',
+};
 
 export default function CardBuyer({
   rarity = 'COMMON',
@@ -29,18 +36,25 @@ export default function CardBuyer({
     }
   };
 
-  return (
-    <div className={styles.cardBuyerContainer}>
-      <div className={styles.cardBuyer}>
-        {/* Header */}
-        <div className={styles.header}>
-          <div className={styles.headerLeft}>
-            <span className={styles.rarity}>{rarity}</span>
-            <span className={styles.separator}>|</span>
-            <span className={styles.category}>{category}</span>
-          </div>
-          <span className={styles.owner}>{owner}</span>
-        </div>
+    const rarityColor = RARITY_COLORS[rarity] || '#FFD700';
+
+    return (
+        <div className={styles.cardBuyerContainer}>
+            <div className={styles.cardBuyer}>
+                {/* Header */}
+                <div className={styles.header}>
+                    <div className={styles.headerLeft}>
+                        <span 
+                            className={styles.rarity}
+                            style={{ color: rarityColor }}
+                        >
+                            {rarity}
+                        </span>
+                        <span className={styles.separator}>|</span>
+                        <span className={styles.category}>{category}</span>
+                    </div>
+                    <span className={styles.owner}>{owner}</span>
+                </div>
 
         {/* Description */}
         <div className={styles.description}>{description}</div>
@@ -59,23 +73,28 @@ export default function CardBuyer({
 
         <div className={styles.divider}></div>
 
-        {/* Purchase Quantity */}
-        <div className={styles.quantitySection}>
-          <Label>구매수량</Label>
-          <div className={styles.quantitySelector}>
-            <Button
-              className={styles.quantityButton}
-              onClick={handleDecrease}
-              disabled={quantity <= 1}
-            >
-              <Image src="/assets/icons/ic_minus.svg" alt="decrease" width={20} height={20} />
-            </Button>
-            <div className={styles.quantityValue}>{quantity}</div>
-            <Button className={styles.quantityButton} onClick={handleIncrease}>
-              <Image src="/assets/icons/ic_plus.svg" alt="increase" width={20} height={20} />
-            </Button>
-          </div>
-        </div>
+                {/* Purchase Quantity */}
+                <div className={styles.quantitySection}>
+                    <Label>구매수량</Label>
+                    <div className={styles.quantitySelector}>
+                        <ButtonBase 
+                            size="xs"
+                            className={styles.quantityButton} 
+                            onClick={handleDecrease}
+                            disabled={quantity <= 1}
+                        >
+                            <Image src="/assets/icons/ic_minus.svg" alt="decrease" width={20} height={20} />
+                        </ButtonBase>
+                        <div className={styles.quantityValue}>{quantity}</div>
+                        <ButtonBase 
+                            size="xs"
+                            className={styles.quantityButton} 
+                            onClick={handleIncrease}
+                        >
+                            <Image src="/assets/icons/ic_plus.svg" alt="increase" width={20} height={20} />
+                        </ButtonBase>
+                    </div>
+                </div>
 
         {/* Total Price */}
         <div className={styles.totalPriceSection}>
@@ -83,11 +102,11 @@ export default function CardBuyer({
           <div className={styles.totalPriceValue}>{totalPrice}</div>
         </div>
 
-        {/* Purchase Button */}
-        <Button className={styles.purchaseButton} onClick={onPurchase}>
-          포토카드 구매하기
-        </Button>
-      </div>
-    </div>
-  );
+                {/* Purchase Button */}
+                <button type="button" className={styles.purchaseButton} onClick={onPurchase}>
+                    포토카드 구매하기
+                </button>
+            </div>
+        </div>    
+    );
 }

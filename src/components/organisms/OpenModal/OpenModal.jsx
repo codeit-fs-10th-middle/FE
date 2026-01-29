@@ -6,7 +6,7 @@ import Modal from '@/components/atoms/Modal/Modal';
 import MyCardDetail from '@/components/organisms/MyCardDetail/MyCardDetail';
 import DropDown from '@/components/atoms/DropDown/DropDown';
 import TextBox from '@/components/atoms/TextBox/TextBox';
-import { ButtonPrimary, ButtonSecondary } from '@/components/atoms/Button';
+import { ButtonPrimary, ButtonSecondary, ResponsiveButton } from '@/components/atoms/Button';
 import styles from './OpenModal.module.css';
 
 export default function OpenModal({ open, onClose, cardData, mode = 'edit', onSellSuccess }) {
@@ -81,6 +81,7 @@ export default function OpenModal({ open, onClose, cardData, mode = 'edit', onSe
             <h1 className={styles.cardTitle}>{cardData?.title || '우리집 앞마당'}</h1>
           </div>
 
+          {/* 1. Photo first, then Details below (stacked) */}
           <div className={styles.photoAndDetailsSection}>
             <div className={styles.photoSection}>
               <Image
@@ -91,7 +92,6 @@ export default function OpenModal({ open, onClose, cardData, mode = 'edit', onSe
                 className={styles.photoImage}
               />
             </div>
-
             <div className={styles.detailsSection}>
               <MyCardDetail
                 rarity={cardData?.rarity || 'LEGENDARY'}
@@ -110,6 +110,7 @@ export default function OpenModal({ open, onClose, cardData, mode = 'edit', onSe
             <h1 className={styles.cardTitle}>교환 희망 정보</h1>
           </div>
 
+          {/* 2. Grade first, then Genre below (stacked) */}
           <div className={styles.gradeGenreSection}>
             <div className={styles.gradeSection}>
               <h3 className={styles.sectionTitle}>등급</h3>
@@ -119,7 +120,6 @@ export default function OpenModal({ open, onClose, cardData, mode = 'edit', onSe
                 onChange={(e) => setGrade(e.target.value)}
               />
             </div>
-
             <div className={styles.genreSection}>
               <h3 className={styles.sectionTitle}>장르</h3>
               <DropDown
@@ -138,12 +138,12 @@ export default function OpenModal({ open, onClose, cardData, mode = 'edit', onSe
           <span className={styles.divider} />
 
           <div className={styles.actionButtons}>
-            <ButtonSecondary onClick={handleCancel} className={styles.cancelButton}>
+            <ResponsiveButton onClick={handleCancel} className={styles.cancelButton}>
               취소
-            </ButtonSecondary>
-            <ButtonPrimary onClick={handleSave} className={styles.saveButton}>
+            </ResponsiveButton>
+            <ResponsiveButton onClick={handleSave} className={styles.saveButton}>
               {saveButtonText}
-            </ButtonPrimary>
+            </ResponsiveButton>
           </div>
         </div>
       </div>

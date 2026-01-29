@@ -1,14 +1,18 @@
 .cardBuyerContainer {
     width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 .cardBuyer {
     width: 100%;
+    max-width: 100%;
     background-color: transparent;
     padding: 0;
     display: flex;
     flex-direction: column;
     gap: 0;
+    overflow-x: hidden;
 }
 
 /* Header */
@@ -26,7 +30,6 @@
 }
 
 .rarity {
-    color: #FF1744;
     font-weight: 700;
     font-size: 18px;
 }
@@ -169,15 +172,18 @@
     text-align: right;
 }
 
-/* Purchase Button */
+/* Purchase Button: yellow, full width, height 75px */
 .purchaseButton {
     width: 100%;
-    background-color: #FFD700;
+    height: 75px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #EFFF04;
     color: #000000;
     border: none;
-    border-radius: 8px;
-    padding: 16px;
-    font-size: 18px;
+    border-radius: 2px;
+    font-size: 16px;
     font-weight: 700;
     cursor: pointer;
     transition: background-color 0.2s, transform 0.1s;
@@ -190,4 +196,98 @@
 
 .purchaseButton:active {
     transform: translateY(0);
+}
+
+/* Mobile Responsive Styles (499px 이하) */
+@media (max-width: 499px) {
+    .cardBuyer {
+        padding: 0;
+    }
+
+    /* Header Mobile */
+    .header {
+        margin-bottom: 16px;
+    }
+
+    .rarity {
+        font-size: 16px;
+    }
+
+    .separator {
+        font-size: 16px;
+    }
+
+    .category {
+        font-size: 16px;
+    }
+
+    .owner {
+        font-size: 16px;
+        text-decoration: none;
+    }
+
+    /* Description Mobile */
+    .description {
+        font-size: 14px;
+        margin-bottom: 16px;
+    }
+
+    /* Divider Mobile */
+    .divider {
+        background-color: #5A5A5A;
+        margin: 16px 0;
+    }
+
+    /* Info Row Mobile */
+    .infoRow {
+        gap: 16px;
+    }
+
+    .infoItem :global(label) {
+        font-size: 14px;
+    }
+
+    .infoValue {
+        font-size: 14px;
+    }
+
+    /* Quantity Section Mobile */
+    .quantitySection {
+        margin-bottom: 16px;
+    }
+
+    .quantitySection :global(label) {
+        font-size: 14px;
+    }
+
+    .quantitySelector {
+        border-color: #ffffff;
+    }
+
+    .quantityValue {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+
+    /* Total Price Section Mobile */
+    .totalPriceSection {
+        margin-bottom: 16px;
+    }
+
+    .totalPriceSection :global(label) {
+        font-size: 14px;
+    }
+
+    .totalPriceValue {
+        font-size: 14px;
+    }
+
+    /* Purchase Button Mobile */
+    .purchaseButton {
+        background-color: #EFFF04;
+        color: #000000;
+        border-radius: 2px;
+        font-weight: 600;
+        margin-top: 0;
+    }
 }

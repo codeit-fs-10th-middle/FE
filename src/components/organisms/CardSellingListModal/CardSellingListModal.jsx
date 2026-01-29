@@ -1,15 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Modal from '@/components/atoms/Modal/Modal';
 import InputSearch from '@/components/molecules/InputSearch/InputSearch';
 import DropDown from '@/components/atoms/DropDown/DropDown';
 import MyCard from '@/components/organisms/MyCard/MyCard';
 import OpenModal from '@/components/organisms/OpenModal/OpenModal';
 import MarketplaceSellSuccessPage from '@/app/(main)/marketplace/sell/success/page';
+import CardSellingForm from '@/components/organisms/CardSellingForm/CardSellingForm';
+import SubHeaderExchange from '@/components/organisms/SubHeader/SubHeaderExchange';
 import styles from './CardSellingListModal.module.css';
 
-export default function CardSellingListModal({ open, onClose }) {
+const STORAGE_SELL_CARD = 'marketplace_sell_card';
+
+export default function CardSellingListModal({ open, onClose, modalTitle = '나의 포토카드 판매하기', onCardSelect, onSellCardSelect, mode = 'sell' }) {
+  const router = useRouter();
   const [search, setSearch] = useState('');
   const [grade, setGrade] = useState('all');
   const [genre, setGenre] = useState('all');
@@ -17,6 +23,32 @@ export default function CardSellingListModal({ open, onClose }) {
   const [selectedCard, setSelectedCard] = useState(null);
   const [isSellSuccessModalOpen, setIsSellSuccessModalOpen] = useState(false);
   const [soldCardData, setSoldCardData] = useState(null);
+  const [isExchangeModalOpen, setIsExchangeModalOpen] = useState(false);
+  const [exchangeCardData, setExchangeCardData] = useState(null);
+  const [isMobileOrTablet, setIsMobileOrTablet] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth <= 1199 : false
+  );
+  const [filters, setFilters] = useState({ rarity: 'all', genre: 'all', soldout: 'all' });
+  const [showSellForm, setShowSellForm] = useState(false);
+  const [sellFormCardData, setSellFormCardData] = useState(null);
+
+  // Detect mobile (≤499px) and tablet (500–1199px): use bottom sheet for both
+  useEffect(() => {
+    const checkViewport = () => {
+      setIsMobileOrTablet(window.innerWidth <= 1199);
+    };
+    checkViewport();
+    window.addEventListener('resize', checkViewport);
+    return () => window.removeEventListener('resize', checkViewport);
+  }, []);
+
+  // Reset sell form state when modal closes
+  useEffect(() => {
+    if (!open) {
+      setShowSellForm(false);
+      setSellFormCardData(null);
+    }
+  }, [open]);
 
   const gradeOptions = [
     { value: 'all', label: '등급' },
@@ -55,86 +87,156 @@ export default function CardSellingListModal({ open, onClose }) {
   ];
 
   const handleCardClick = (card) => {
-    setSelectedCard(card);
-    setIsOpenModalOpen(true);
+    if (mode === 'exchange' && onCardSelect) {
+      setExchangeCardData(card);
+      onCardSelect(card);
+      onClose();
+    } else if (mode === 'sell') {
+      // Desktop: show sell form inside modal
+      // Mobile/Tablet: navigate to full page
+      if (!isMobileOrTablet) {
+        // Desktop: show form in modal
+        setSellFormCardData(card);
+        setShowSellForm(true);
+      } else if (onSellCardSelect) {
+        // Mobile/Tablet: navigate to full page
+        try {
+          sessionStorage.setItem(STORAGE_SELL_CARD, JSON.stringify(card));
+        } catch {}
+        onClose();
+        onSellCardSelect(card);
+      } else {
+        // Fallback: open OpenModal
+        setSelectedCard(card);
+        setIsOpenModalOpen(true);
+      }
+    }
+  };
+
+  const handleSellFormBack = () => {
+    setShowSellForm(false);
+    setSellFormCardData(null);
+  };
+
+  const handleSellFormSuccess = (payload) => {
+    setShowSellForm(false);
+    setSellFormCardData(null);
+    setSoldCardData(payload);
+    setIsSellSuccessModalOpen(true);
   };
 
   return (
-    <Modal open={open} onClose={onClose} size="custom">
+    <Modal 
+      open={open} 
+      onClose={onClose} 
+      size={isMobileOrTablet ? "bottomSheetFull" : "custom"}
+      showCloseButton={!isMobileOrTablet && !showSellForm}
+    >
       <div className={styles.modalContainer}>
-        {/* Scrollable content area */}
-        <div className={styles.scrollableContent}>
-          {/* "마이갤러리" Subtitle */}
-          <div className={styles.subtitleBox}>
-            <h2 className={styles.subtitle}>마이갤러리</h2>
-          </div>
+        {/* Desktop: Show sell form or card list */}
+        {!isMobileOrTablet && showSellForm && sellFormCardData ? (
+          <CardSellingForm
+            cardData={sellFormCardData}
+            onBack={handleSellFormBack}
+            onSuccess={handleSellFormSuccess}
+            isInModal={true}
+          />
+        ) : (
+          /* Scrollable content area */
+          <div className={styles.scrollableContent}>
+            {/* Desktop (≥1200px): Original layout */}
+            {!isMobileOrTablet && (
+              <>
+                {/* "마이갤러리" Subtitle */}
+                <div className={styles.subtitleBox}>
+                  <h2 className={styles.subtitle}>마이갤러리</h2>
+                </div>
 
-          {/* "나의 포토카드 판매하기" Main Title */}
-          <div className={styles.titleBox}>
-            <h1
-              className={styles.mainTitle}
-              style={{
-                fontFamily: "'Noto Sans KR', sans-serif",
-                fontWeight: 700,
-                fontStyle: 'normal',
-                fontSize: '40px',
-                lineHeight: '100%',
-                color: '#ffffff',
-                margin: 0,
-                paddingBottom: '20px',
-              }}
-            >
-              나의 포토카드 판매하기
-            </h1>
-          </div>
+                {/* Main Title */}
+                <div className={styles.titleBox}>
+                  <h1
+                    className={styles.mainTitle}
+                    style={{
+                      fontFamily: "'Noto Sans KR', sans-serif",
+                      fontWeight: 700,
+                      fontStyle: 'normal',
+                      fontSize: '40px',
+                      lineHeight: '100%',
+                      color: '#ffffff',
+                      margin: 0,
+                      paddingBottom: '20px',
+                    }}
+                  >
+                    {modalTitle}
+                  </h1>
+                </div>
 
-          {/* Search and Filter Section */}
-          <div className={styles.filterSection}>
-            <InputSearch
-              placeholder="검색"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onClick={() => {}}
-              className={styles.searchInput}
-            />
-            <div className={styles.dropdownWrapper}>
-              <DropDown
-                options={gradeOptions}
-                value={grade}
-                onChange={(e) => setGrade(e.target.value)}
-                wrapperStyle={{ border: '0px solid #ffffff' }}
-                style={{ border: '0px solid #ffffff', backgroundColor: '#141414' }}
+                {/* Search and Filter Section */}
+                <div className={styles.filterSection}>
+                  <InputSearch
+                    placeholder="검색"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    onClick={() => {}}
+                    className={styles.searchInput}
+                  />
+                  <div className={styles.dropdownWrapper}>
+                    <DropDown
+                      options={gradeOptions}
+                      value={grade}
+                      onChange={(e) => setGrade(e.target.value)}
+                      wrapperStyle={{ border: '0px solid #ffffff' }}
+                      style={{ border: '0px solid #ffffff', backgroundColor: '#141414' }}
+                    />
+                  </div>
+                  <div className={styles.dropdownWrapper}>
+                    <DropDown
+                      options={genreOptions}
+                      value={genre}
+                      onChange={(e) => setGenre(e.target.value)}
+                      wrapperStyle={{ border: '0px solid #ffffff' }}
+                      style={{ border: '0px solid #ffffff', backgroundColor: '#141414' }}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Mobile & Tablet: SubHeaderExchange (bottom sheet header) */}
+            {isMobileOrTablet && (
+              <SubHeaderExchange
+                subtitle="마이갤러리"
+                title={modalTitle}
+                search={search}
+                onSearchChange={(e) => setSearch(e.target.value)}
+                filters={filters}
+                onFiltersChange={setFilters}
+                cards={sampleCards}
+                onClose={onClose}
               />
-            </div>
-            <div className={styles.dropdownWrapper}>
-              <DropDown
-                options={genreOptions}
-                value={genre}
-                onChange={(e) => setGenre(e.target.value)}
-                wrapperStyle={{ border: '0px solid #ffffff' }}
-                style={{ border: '0px solid #ffffff', backgroundColor: '#141414' }}
-              />
-            </div>
-          </div>
+            )}
 
-          {/* MyCard Grid (2 columns x 5 rows) */}
-          <div className={styles.cardsGrid}>
-            {sampleCards.map((card) => (
-              <div key={card.id} className={styles.cardItem}>
-                <MyCard
-                  rarity={card.rarity}
-                  category={card.category}
-                  owner={card.owner}
-                  description={card.description}
-                  price={card.price}
-                  quantity={card.quantity}
-                  imageSrc={card.imageSrc}
-                  onClick={() => handleCardClick(card)}
-                />
-              </div>
-            ))}
+            {/* MyCard Grid (2 columns x 5 rows) */}
+            <div className={styles.cardsGrid}>
+              {sampleCards.map((card) => (
+                <div key={card.id} className={styles.cardItem}>
+                  <MyCard
+                    rarity={card.rarity}
+                    category={card.category}
+                    owner={card.owner}
+                    description={card.description}
+                    price={card.price}
+                    quantity={card.quantity}
+                    imageSrc={card.imageSrc}
+                    imageWidth={isMobileOrTablet ? 170 : 400}
+                    imageHeight={isMobileOrTablet ? 150 : 400}
+                    onClick={() => handleCardClick(card)}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Open Modal for selling */}
@@ -159,6 +261,7 @@ export default function CardSellingListModal({ open, onClose }) {
         open={isSellSuccessModalOpen}
         onClose={() => {
           setIsSellSuccessModalOpen(false);
+          setSoldCardData(null);
         }}
         size="custom"
         noBorder={true}
