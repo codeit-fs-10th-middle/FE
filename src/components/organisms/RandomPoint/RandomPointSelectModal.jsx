@@ -20,13 +20,13 @@ export default function RandomPointSelectModal({
   onConfirm,
   timeText = '59분 59초',
 }) {
-  const bp = useBreakpoint(); // 'sm' | 'md' | 'lg'
-  const size = bp ?? 'lg'; // 초기 null 방어(첫 렌더)
+  const bp = useBreakpoint();
+  const size = bp === 'sm' ? 'sm' : bp === 'md' ? 'md' : 'lg'; // lg/xl/wide 전부 lg 취급
 
   const [selectedBoxId, setSelectedBoxId] = useState(null);
   const isSelected = Boolean(selectedBoxId);
 
-  const { boxW, boxH } = UI[size];
+  const { boxW, boxH } = UI[size] ?? UI.lg;
 
   const containerSizeClass =
     size === 'sm' ? styles.containerSm : size === 'md' ? styles.containerMd : styles.containerLg;
