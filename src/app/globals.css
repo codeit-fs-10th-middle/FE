@@ -19,6 +19,7 @@ body {
 
 body {
   margin: 0;
+  font-family: sans-serif;
 }
 
 /* ResponsiveButton: Primary on desktop (≥1200px), Secondary on tablet/mobile */
