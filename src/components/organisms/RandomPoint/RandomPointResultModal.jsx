@@ -13,11 +13,8 @@ export default function RandomPointResultModal({
   timeText = '59분 59초',
 }) {
   const bp = useBreakpoint();
-
-  // sm/md/lg로 정규화 (xl/wide -> lg)
   const size = bp === 'sm' ? 'sm' : bp === 'md' ? 'md' : 'lg';
 
-  // getRewardImage가 lg/md/sm만 받는다고 가정하고 안전하게 호출
   const pointImageSrc = getRewardImage(size);
 
   return (

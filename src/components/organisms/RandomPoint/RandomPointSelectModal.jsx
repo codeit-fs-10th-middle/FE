@@ -21,12 +21,11 @@ export default function RandomPointSelectModal({
   timeText = '59분 59초',
 }) {
   const bp = useBreakpoint();
-  const size = bp === 'sm' ? 'sm' : bp === 'md' ? 'md' : 'lg'; // lg/xl/wide 전부 lg 취급
+  const size = bp === 'sm' ? 'sm' : bp === 'md' ? 'md' : 'lg';
+  const { boxW, boxH } = UI[size] ?? UI.lg;
 
   const [selectedBoxId, setSelectedBoxId] = useState(null);
   const isSelected = Boolean(selectedBoxId);
-
-  const { boxW, boxH } = UI[size] ?? UI.lg;
 
   const containerSizeClass =
     size === 'sm' ? styles.containerSm : size === 'md' ? styles.containerMd : styles.containerLg;
