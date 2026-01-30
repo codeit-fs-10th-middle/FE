@@ -67,16 +67,10 @@ export default function Modal({
       ? styles.bottomSheet
       : styles[size];
 
-  const computedOverlayClassName = isBottomSheetFull
-    ? styles.overlayBottomSheetFull
-    : `${styles.overlay} ${overlayExtra}`;
+  const computedOverlayClassName = [styles.overlay, overlayExtra].filter(Boolean).join(' ');
 
   return createPortal(
-    <div
-      className={[computedOverlayClassName, overlayClassName].filter(Boolean).join(' ')}
-      role="dialog"
-      aria-modal="true"
-    >
+    <div className={[computedOverlayClassName, overlayClassName].filter(Boolean).join(' ')}>
       <div className={styles.backdrop} onClick={closeOnOverlay ? onClose : undefined} />
 
       <div
@@ -88,6 +82,8 @@ export default function Modal({
         ]
           .filter(Boolean)
           .join(' ')}
+        role="dialog"
+        aria-modal="true"
       >
         {showCloseButton && (
           <button className={styles.close} onClick={onClose} aria-label="닫기">
