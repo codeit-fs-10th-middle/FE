@@ -118,7 +118,7 @@ export default function Home() {
 
               <div className="mt-[28px] flex justify-center">
                 <ButtonPrimary
-                  href="/market"
+                  href="/marketplace"
                   thickness="thin"
                   size="M"
                   className={`${HERO.buttonW} ${HERO.buttonH} !px-0`}
@@ -303,7 +303,7 @@ export default function Home() {
 
                 <div className="mt-[24px]">
                   <ButtonPrimary
-                    href="/market"
+                    href="/marketplace"
                     thickness="thin"
                     size="M"
                     className="!w-[266px] !h-[55px] !px-0"

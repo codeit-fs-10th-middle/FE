@@ -22,8 +22,7 @@ export default function RandomPointSelectModal({
 }) {
   const bp = useBreakpoint();
   const size = bp === 'sm' ? 'sm' : bp === 'md' ? 'md' : 'lg';
-
-  const { boxW, boxH } = UI[size] ?? UI.lg; // 보험
+  const { boxW, boxH } = UI[size] ?? UI.lg;
 
   const [selectedBoxId, setSelectedBoxId] = useState(null);
   const isSelected = Boolean(selectedBoxId);
