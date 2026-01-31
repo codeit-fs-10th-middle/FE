@@ -24,6 +24,7 @@
 
 /* ===== thickness ===== */
 .th_thick {
+  color: black;
   background: #efff04;
   border-width: 2px;
   border-color: #efff04;
@@ -31,6 +32,7 @@
 }
 
 .th_thin {
+  color: black;
   background: #efff04;
   color: yellow;
   border-width: 1px;
@@ -69,6 +71,7 @@
 }
 
 .th_thin.size_m {
+  color: black;
   height: 55px;
 }
 
