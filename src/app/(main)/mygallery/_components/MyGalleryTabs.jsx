@@ -5,12 +5,12 @@ import { usePathname } from 'next/navigation';
 
 const TABS = [
   { href: '/mygallery', label: '보유 포토카드' },
-  { href: '/mygallery/selling', label: '판매 포토카드' },
-  { href: '/mygallery/create', label: '포토카드 생성' },
+  { href: '/mygallery/selling', label: '판매 중인 포토카드' },
+  { href: '/create-card', label: '포토카드 생성' },
 ];
 
 function isActive(pathname, href) {
-  if (href === '/mygallery') return pathname === '/mygallery';
+  if (href === '/create-card') return pathname === '/create-card';
   return pathname.startsWith(href);
 }
 

@@ -18,41 +18,72 @@ const GENRE_OPTIONS = [
   { label: '여행', value: '여행' },
 ];
 
+// ✅ 판매 페이지에서만 쓰는 옵션
+const SELL_METHOD_OPTIONS = [
+  { label: '판매방법', value: 'ALL' },
+  { label: '판매', value: 'SELL' },
+  { label: '교환', value: 'TRADE' },
+];
+
+const SOLD_OUT_OPTIONS = [
+  { label: '매진여부', value: 'ALL' },
+  { label: '매진', value: 'SOLD_OUT' },
+  { label: '판매중', value: 'ON_SALE' },
+];
+
+function pickValue(eOrValue) {
+  if (typeof eOrValue === 'string') return eOrValue;
+  return (
+    eOrValue?.target?.value ??
+    eOrValue?.currentTarget?.value ??
+    eOrValue?.target?.dataset?.value ??
+    eOrValue?.currentTarget?.dataset?.value
+  );
+}
+
 export default function MyGalleryFilterBar({
   isMobile,
   search,
   onChangeSearch,
+
   grade,
   onChangeGrade,
   genre,
   onChangeGenre,
+
+  // ✅ 추가: selling 페이지에서만 true로 넘기면 됨 (기본 false)
+  showExtraFilters = false,
+
+  // ✅ extra 필터 props (selling 페이지에서만 전달해도 됨)
+  sellMethod,
+  onChangeSellMethod,
+  soldOut,
+  onChangeSoldOut,
+
   onOpenMobileFilter,
 }) {
-  // ✅ Dropdown이 value(string) 또는 event 둘 다 줄 수 있어서 여기서 통일 처리
   const handleGradeChange = (eOrValue) => {
-    const next =
-      typeof eOrValue === 'string'
-        ? eOrValue
-        : (eOrValue?.target?.value ??
-          eOrValue?.currentTarget?.value ??
-          eOrValue?.target?.dataset?.value ??
-          eOrValue?.currentTarget?.dataset?.value);
-
+    const next = pickValue(eOrValue);
     if (next == null) return;
     onChangeGrade(next);
   };
 
   const handleGenreChange = (eOrValue) => {
-    const next =
-      typeof eOrValue === 'string'
-        ? eOrValue
-        : (eOrValue?.target?.value ??
-          eOrValue?.currentTarget?.value ??
-          eOrValue?.target?.dataset?.value ??
-          eOrValue?.currentTarget?.dataset?.value);
-
+    const next = pickValue(eOrValue);
     if (next == null) return;
     onChangeGenre(next);
+  };
+
+  const handleSellMethodChange = (eOrValue) => {
+    const next = pickValue(eOrValue);
+    if (next == null) return;
+    onChangeSellMethod?.(next);
+  };
+
+  const handleSoldOutChange = (eOrValue) => {
+    const next = pickValue(eOrValue);
+    if (next == null) return;
+    onChangeSoldOut?.(next);
   };
 
   // =====================
@@ -102,27 +133,50 @@ export default function MyGalleryFilterBar({
       {/* 간격 60px */}
       <div className="w-[60px] shrink-0" />
 
-      {/* 드롭다운 2개 */}
+      {/* 드롭다운 */}
       <div className="flex items-center gap-[10px]">
-        {/* ✅ 등급 */}
+        {/* 등급 */}
         <div className="w-[120px] h-[50px] shrink-0">
           <Dropdown
             label="등급"
             value={grade}
             options={GRADE_OPTIONS}
-            onChange={handleGradeChange} // ✅ 여기만 변경
+            onChange={handleGradeChange}
           />
         </div>
 
-        {/* ✅ 장르 */}
+        {/* 장르 */}
         <div className="w-[128px] h-[50px] shrink-0">
           <Dropdown
             label="장르"
             value={genre}
             options={GENRE_OPTIONS}
-            onChange={handleGenreChange} // ✅ 여기만 변경
+            onChange={handleGenreChange}
           />
         </div>
+
+        {/* ✅ selling 페이지에서만 노출 */}
+        {showExtraFilters && (
+          <>
+            <div className="w-[140px] h-[50px] shrink-0">
+              <Dropdown
+                label="판매방법"
+                value={sellMethod ?? 'ALL'}
+                options={SELL_METHOD_OPTIONS}
+                onChange={handleSellMethodChange}
+              />
+            </div>
+
+            <div className="w-[140px] h-[50px] shrink-0">
+              <Dropdown
+                label="매진여부"
+                value={soldOut ?? 'ALL'}
+                options={SOLD_OUT_OPTIONS}
+                onChange={handleSoldOutChange}
+              />
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
