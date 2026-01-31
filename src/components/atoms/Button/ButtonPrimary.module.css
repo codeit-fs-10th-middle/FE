@@ -99,3 +99,8 @@
 .fullWidth.th_thin.size_xs {
   width: 100% !important;
 }
+
+.primary {
+  background-color: #efff04;
+  color: #000000;
+}
