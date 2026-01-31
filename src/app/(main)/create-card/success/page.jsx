@@ -1,9 +1,12 @@
+import React from 'react';
 import Container from '@/components/layout/Container';
 import SuccessClient from './SuccessClient';
 
 export default function CreateCardSuccessPage({ searchParams }) {
-  const grade = searchParams?.grade ?? 'RARE';
-  const title = searchParams?.title ?? '유리진 엄마당';
+  const sp = React.use(searchParams); // ✅ unwrap
+
+  const grade = sp?.grade ?? 'RARE';
+  const title = sp?.title ?? '유리진 엄마당';
 
   return (
     <main className="min-h-screen bg-black text-white relative">
