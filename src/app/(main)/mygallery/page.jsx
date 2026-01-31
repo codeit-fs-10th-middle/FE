@@ -10,6 +10,7 @@ import GradeChips from './_components/GradeChips';
 import Pagination from './_components/Pagination';
 import MyGalleryFilterBar from './_components/MyGalleryFilterBar';
 import MyGalleryMobileHeader from './_components/MyGalleryMobileHeader';
+import { useMyGalleryCount } from './_components/MyGalleryCountContext';
 
 import styles from './page.module.css';
 
@@ -19,6 +20,9 @@ export default function MyGalleryPage() {
   const router = useRouter();
   const bp = useBreakpoint();
   const isMobile = bp === 'sm';
+
+  // ✅ label까지 같이 (Shell에서 label을 Context로 넣었다는 전제)
+  const { setOwnedCount, setLabel } = useMyGalleryCount();
 
   const [search, setSearch] = useState('');
   const [grade, setGrade] = useState('ALL');
@@ -38,7 +42,7 @@ export default function MyGalleryPage() {
       },
       { total: 0, common: 0, rare: 0, superRare: 0, legendary: 0 },
     );
-  }, []);
+  }, [sampleCards]); // sampleCards가 상수면 사실상 고정
 
   /* 필터 */
   const filteredCards = useMemo(() => {
@@ -51,6 +55,11 @@ export default function MyGalleryPage() {
       return okSearch && okGrade && okGenre;
     });
   }, [search, grade, genre]);
+
+  useEffect(() => {
+    setLabel?.('유디님이 보유한 포토카드');
+    setOwnedCount(gradeCounts.total);
+  }, [gradeCounts.total, setOwnedCount, setLabel]);
 
   const totalPages = Math.max(1, Math.ceil(filteredCards.length / PAGE_SIZE));
   const pagedCards = filteredCards.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
