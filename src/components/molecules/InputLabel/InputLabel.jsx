@@ -1,27 +1,35 @@
 // src/components/molecules/InputLabel/InputLabel.jsx
-"use client";
+'use client';
 
-import Input from "../../atoms/Input/Input";
-import Label from "../../atoms/Label/Label";
-import styles from "./InputLabel.module.css";
+import Input from '@/components/atoms/Input/Input';
+import Label from '@/components/atoms/Label/Label';
+import styles from './InputLabel.module.css';
 
-export default function InputLabel({ 
-    label, 
-    placeholder, 
-    value, 
-    onChange, 
-    className 
+export default function InputLabel({
+  label,
+  placeholder,
+  value,
+  onChange,
+  maxLength = 30,
+  error,
+  className = '',
 }) {
-    return (
-        <div className={`${styles.inputLabel} ${className}`}>
-            <Label>{label}</Label>
-            <Input 
-                className={styles.input} 
-                type="text" 
-                placeholder={placeholder} 
-                value={value} 
-                onChange={onChange} 
-            />
-        </div>
-    );
+  const isError = Boolean(error);
+
+  return (
+    <div className={`${styles.inputLabel} ${className}`}>
+      <Label>{label}</Label>
+
+      <Input
+        type="text"
+        placeholder={placeholder}
+        value={value}
+        maxLength={maxLength}
+        onChange={onChange}
+        className={`${styles.input} ${isError ? styles.error : ''}`}
+      />
+
+      {isError && <p className={styles.errorMessage}>{error}</p>}
+    </div>
+  );
 }
