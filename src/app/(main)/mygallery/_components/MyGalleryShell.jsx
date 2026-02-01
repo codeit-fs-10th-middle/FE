@@ -11,11 +11,9 @@ import { MyGalleryCountProvider } from './MyGalleryCountContext';
 export default function MyGalleryShell({ children }) {
   const router = useRouter();
 
-  // ✅ 큰 타이틀(페이지별로 바뀜)
   const [title, setTitle] = useState('마이갤러리');
 
-  // ✅ 아래 문구(페이지별로 바뀜)
-  const [label, setLabel] = useState('유디님이 보유한 포토카드');
+  const [label, setLabel] = useState('보유한 포토카드');
 
   const [ownedCount, setOwnedCount] = useState(0);
 
@@ -45,9 +43,7 @@ export default function MyGalleryShell({ children }) {
 
           <div className="mt-[24px]">
             <div className="flex items-end gap-2">
-              <span className="text-[24px] font-bold leading-[100%] text-white/80">
-                {label} {/* ✅ 아래 문구 */}
-              </span>
+              <span className="text-[24px] font-bold leading-[100%] text-white/80">{label}</span>
               <span className="text-[20px] font-normal leading-[100%] text-white/50">
                 ({ownedCount}장)
               </span>
