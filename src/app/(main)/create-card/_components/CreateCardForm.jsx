@@ -193,7 +193,6 @@ export default function CreateCardForm() {
     if (submitting) return;
     setSubmitting(true);
 
-    // TODO: 로그인 연동되면 실제 userId로 교체
     const creatorUserId = 1;
 
     try {
@@ -202,10 +201,10 @@ export default function CreateCardForm() {
       formData.append('name', name.trim());
       formData.append('description', desc.trim());
       formData.append('genre', genre);
-      formData.append('grade', grade); // common/rare/epic/legendary
+      formData.append('grade', grade); // common / rare / epic / legendary
       formData.append('minPrice', String(Number(price)));
       formData.append('totalSupply', String(Number(total)));
-      formData.append('file', file); // ✅ multer.single("file")
+      formData.append('file', file);
 
       const res = await fetch(`${API_BASE}/api/photo-cards`, {
         method: 'POST',
@@ -214,14 +213,19 @@ export default function CreateCardForm() {
 
       const json = await res.json().catch(() => null);
 
+      // 실패 (서버 응답 있음)
       if (!res.ok) {
         const qs = new URLSearchParams({
           reason: json?.error || json?.message || `HTTP_${res.status}`,
+          title: name.trim(),
+          grade,
         }).toString();
+
         router.push(`/create-card/fail?${qs}`);
         return;
       }
 
+      // 성공
       const photoCardId = json?.data?.photoCardId;
       const qs = new URLSearchParams({
         id: photoCardId ? String(photoCardId) : '',
@@ -231,7 +235,14 @@ export default function CreateCardForm() {
 
       router.push(`/create-card/success?${qs}`);
     } catch {
-      router.push('/create-card/fail?reason=NETWORK_ERROR');
+      // 실패 (네트워크 에러 / CORS 등)
+      const qs = new URLSearchParams({
+        reason: 'NETWORK_ERROR',
+        title: name.trim(),
+        grade,
+      }).toString();
+
+      router.push(`/create-card/fail?${qs}`);
     } finally {
       setSubmitting(false);
     }
