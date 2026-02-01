@@ -31,10 +31,28 @@
   text-overflow: ellipsis;
 }
 
+/* ✅ icon wrapper: 정렬/크기 통일 */
 .icon {
   position: absolute;
   right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
   pointer-events: none;
+
+  width: 24px;
+  height: 24px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ✅ svg(img) 표시 규칙 통일 */
+.icon img {
+  display: block; /* baseline 여백 제거 */
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
 /* Dropdown menu */
