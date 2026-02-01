@@ -23,73 +23,18 @@ function normalizeGrade(v) {
   return g || 'COMMON';
 }
 
-// ✅ 이미지 URL 정규화: /public 제거 + baseURL 붙이기
-function normalizeImageUrl(url) {
-  if (!url) return null;
-  let u = String(url);
-
-  if (u.startsWith('/public/')) u = u.replace('/public', '');
-
-  if (u.startsWith('/')) {
-    const base = (process.env.NEXT_PUBLIC_API_BASE_URL || '').replace(/\/$/, '');
-    return base ? `${base}${u}` : u;
-  }
-
-  return u;
-}
-
-/**
- * ✅ Listing 응답 → CardOriginal props 로 변환
- * 기대 응답(예시):
- * item.listingId, item.sellerUserId, item.saleType, item.status, item.quantity, item.pricePerUnit
- * item.photoCard.{ name, grade, genre, imageUrl(or image_url), description }
- */
-function listingToCard(item) {
-  const pc = item?.photoCard ?? {};
-
-  const listingId = item?.listingId ?? item?.listing_id ?? item?.id;
-  const sellerUserId = item?.sellerUserId ?? item?.seller_user_id;
-  const sellerNickname = item?.sellerNickname ?? item?.seller_nickname;
-
-  const saleType = item?.saleType ?? item?.sale_type ?? 'SELL'; // SELL | TRADE
-  const status = item?.status ?? null; // ACTIVE | SOLD_OUT | ...
-
-  const quantity = Number(item?.quantity ?? 0);
-  const pricePerUnit = Number(item?.pricePerUnit ?? item?.price_per_unit ?? 0);
-
-  const grade = normalizeGrade(pc?.grade ?? pc?.rarity);
-  const category = pc?.genre ?? pc?.category ?? 'ALL';
-
-  const title = pc?.name ?? pc?.title ?? pc?.description ?? '';
-  const imageSrc =
-    normalizeImageUrl(pc?.imageUrl ?? pc?.image_url ?? pc?.image) ||
-    '/assets/products/photo-card.svg';
-
-  return {
-    // CardOriginal이 사용하는 props
-    id: listingId,
-    rarity: grade,
-    category,
-    owner: sellerNickname ?? String(sellerUserId ?? ''),
-    description: title,
-    price: `${pricePerUnit} P`,
-    remaining: quantity,
-    outof: quantity,
-    imageSrc,
-
-    // 필터용 메타
-    sellMethod: saleType, // SELL | TRADE
-    status, // ACTIVE | SOLD_OUT | ON_SALE ...
-    sellerUserId,
-  };
-}
-
 export default function MyGallerySellingPage() {
   const router = useRouter();
   const bp = useBreakpoint();
   const isMobile = bp === 'sm';
 
   const { setOwnedCount, setTitle } = useMyGalleryCount();
+
+  // ✅ env
+  // ✅ 반드시 Netlify env를 이렇게 설정: https://be-1-yqrf.onrender.com/api
+  const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || '').replace(/\/$/, '');
+  // ✅ 이미지/정적파일은 보통 /api 없이 서빙됨 → origin 분리
+  const ORIGIN_BASE = useMemo(() => API_BASE.replace(/\/api$/, ''), [API_BASE]);
 
   // ✅ filters
   const [search, setSearch] = useState('');
@@ -108,18 +53,72 @@ export default function MyGallerySellingPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // ✅ sellerUserId는 백엔드가 "지원"한다 했으니, FE는 localStorage나 auth state에서 가져오는 게 정석인데
-  // 일단 가장 안전하게: /users/me 1회로 가져오자.
-  // (원하면 이 부분을 프로젝트 auth store로 바꿔도 됨)
   const [meId, setMeId] = useState(null);
 
-  const API_BASE_DIRECT = (process.env.NEXT_PUBLIC_API_BASE_URL || '').replace(/\/$/, '');
+  // ✅ 이미지 URL 정규화: /public 제거 + ORIGIN_BASE 붙이기
+  const normalizeImageUrl = useCallback(
+    (url) => {
+      if (!url) return null;
+      let u = String(url);
 
+      if (u.startsWith('/public/')) u = u.replace('/public', '');
+      if (u.startsWith('/')) return ORIGIN_BASE ? `${ORIGIN_BASE}${u}` : u;
+
+      return u;
+    },
+    [ORIGIN_BASE],
+  );
+
+  /**
+   * ✅ Listing 응답 → CardOriginal props 로 변환
+   */
+  const listingToCard = useCallback(
+    (item) => {
+      const pc = item?.photoCard ?? {};
+
+      const listingId = item?.listingId ?? item?.listing_id ?? item?.id;
+      const sellerUserId = item?.sellerUserId ?? item?.seller_user_id;
+      const sellerNickname = item?.sellerNickname ?? item?.seller_nickname;
+
+      const saleType = item?.saleType ?? item?.sale_type ?? 'SELL'; // SELL | TRADE
+      const status = item?.status ?? null; // ACTIVE | SOLD_OUT | ...
+
+      const quantity = Number(item?.quantity ?? 0);
+      const pricePerUnit = Number(item?.pricePerUnit ?? item?.price_per_unit ?? 0);
+
+      const g = normalizeGrade(pc?.grade ?? pc?.rarity);
+      const category = pc?.genre ?? pc?.category ?? 'ALL';
+
+      const title = pc?.name ?? pc?.title ?? pc?.description ?? '';
+      const imageSrc =
+        normalizeImageUrl(pc?.imageUrl ?? pc?.image_url ?? pc?.image) ||
+        '/assets/products/photo-card.svg';
+
+      return {
+        id: listingId,
+        rarity: g,
+        category,
+        owner: sellerNickname ?? String(sellerUserId ?? ''),
+        description: title,
+        price: `${pricePerUnit} P`,
+        remaining: quantity,
+        outof: quantity,
+        imageSrc,
+
+        sellMethod: saleType,
+        status,
+        sellerUserId,
+      };
+    },
+    [normalizeImageUrl],
+  );
+
+  // ✅ me 조회
   useEffect(() => {
     (async () => {
       try {
-        if (!API_BASE_DIRECT) return;
-        const res = await fetch(`${API_BASE_DIRECT}/users/me`, { credentials: 'include' });
+        if (!API_BASE) return;
+        const res = await fetch(`${API_BASE}/users/me`, { credentials: 'include' });
         if (!res.ok) return;
         const json = await res.json();
         const me = json?.data?.user ?? json?.user ?? null;
@@ -128,12 +127,12 @@ export default function MyGallerySellingPage() {
         // ignore
       }
     })();
-  }, [API_BASE_DIRECT]);
+  }, [API_BASE]);
 
-  // ✅ soldOut를 API status로 보낼지 여부 (지원하면 보내는 게 더 좋음)
+  // ✅ soldOut → statusParam
   const statusParam = useMemo(() => {
     if (soldOut === 'SOLD_OUT') return 'SOLD_OUT';
-    if (soldOut === 'ON_SALE') return 'ACTIVE'; // 백엔드가 ACTIVE로 쓰면 이걸로
+    if (soldOut === 'ON_SALE') return 'ACTIVE';
     return null;
   }, [soldOut]);
 
@@ -143,21 +142,20 @@ export default function MyGallerySellingPage() {
         setLoading(true);
         setError('');
 
+        if (!API_BASE) throw new Error('NEXT_PUBLIC_API_BASE_URL is missing');
+
         const qs = new URLSearchParams();
         qs.set('limit', String(LISTINGS_LIMIT));
 
-        // ✅ 백엔드가 sellerUserId 필터 지원한다고 했으니 사용
         if (meId != null) qs.set('sellerUserId', String(meId));
-
-        // ✅ status 필터도 지원하면 보내기
         if (statusParam) qs.set('status', statusParam);
 
-        // ✅ cursor
         const cursorToUse = cursorOverride !== undefined ? cursorOverride : nextCursor;
         if (cursorToUse) qs.set('cursor', String(cursorToUse));
 
-        if (!API_BASE_DIRECT) throw new Error('NEXT_PUBLIC_API_BASE_URL is missing');
-        const url = `${API_BASE_DIRECT}/listings?${qs.toString()}`;
+        // ✅ env에 /api 포함이므로 그냥 /listings만 붙이면 됨
+        const url = `${API_BASE}/listings?${qs.toString()}`;
+
         const res = await fetch(url, { credentials: 'include' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
@@ -176,7 +174,7 @@ export default function MyGallerySellingPage() {
         setLoading(false);
       }
     },
-    [API_BASE_DIRECT, meId, nextCursor, statusParam],
+    [API_BASE, meId, statusParam, nextCursor, listingToCard],
   );
 
   // ✅ 타이틀
@@ -186,7 +184,6 @@ export default function MyGallerySellingPage() {
 
   // ✅ meId 준비되면 로딩
   useEffect(() => {
-    // sellerUserId 필터를 쓰는 구조라 meId 없으면 대기
     if (meId == null) return;
     setListings([]);
     setNextCursor(null);
@@ -194,7 +191,7 @@ export default function MyGallerySellingPage() {
     fetchListings(null, false);
   }, [meId, statusParam, fetchListings]);
 
-  // ✅ FE 필터 (search/grade/genre/sellMethod + soldOut(remaining 기반 보강))
+  // ✅ FE 필터
   const filteredCards = useMemo(() => {
     return listings.filter((c) => {
       const hay = `${c.description ?? ''} ${c.owner ?? ''} ${c.category ?? ''}`.toLowerCase();
@@ -224,7 +221,7 @@ export default function MyGallerySellingPage() {
     };
   }, [filteredCards]);
 
-  // ✅ 상단 카운트 반영
+  // ✅ 상단 카운트
   useEffect(() => {
     setOwnedCount(filteredCards.length);
   }, [filteredCards.length, setOwnedCount]);
@@ -237,7 +234,7 @@ export default function MyGallerySellingPage() {
     setPage(1);
   }, [search, grade, genre, sellMethod, soldOut]);
 
-  // ✅ 다음 페이지가 필요한데 데이터 부족하고 cursor 있으면 더 가져오기
+  // ✅ 다음 페이지 필요한데 데이터 부족 + cursor 있으면 추가 fetch
   useEffect(() => {
     const need = page * PAGE_SIZE;
     if (filteredCards.length < need && nextCursor && !loading) {

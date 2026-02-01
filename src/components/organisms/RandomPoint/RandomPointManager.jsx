@@ -3,16 +3,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import RandomPointSelectModal from './RandomPointSelectModal';
 import RandomPointResultModal from './RandomPointResultModal';
+import { apiUrl } from '@/lib/http/baseUrl'; // 위에서 만든 유틸
 
 const COOLDOWN_SECONDS = 60 * 60;
 const POLL_MS = 30 * 1000;
 
-// ✅ /api 프록시로 통일 (Netlify redirect 사용)
-const API_PREFIX = '/api';
-
-// ✅ 백엔드 라우트에 맞게 여기만 바꾸면 됨
-const POINT_DRAW_PATH = `${API_PREFIX}/point-box-draws/draw`;
-const POINT_HISTORY_PATH = `${API_PREFIX}/point-box-draws/draw-history`; // <- 백엔드가 다르면 여기 변경
+const POINT_DRAW_PATH = '/api/point-box-draws/draw';
+const POINT_HISTORY_PATH = '/api/point-box-draws/draw-history';
 
 function pad2(n) {
   return String(n).padStart(2, '0');
@@ -30,7 +27,7 @@ function parseDateSafe(v) {
 }
 
 export default function RandomPointManager() {
-  // TODO: 로그인 연동되면 여기서 userId 가져오기
+  // TODO: 로그인 붙으면 userId 제거하고 서버에서 req.user로 처리
   const userId = 1;
 
   const [selectOpen, setSelectOpen] = useState(false);
@@ -55,10 +52,9 @@ export default function RandomPointManager() {
   const refreshStatus = useCallback(async () => {
     try {
       const qs = new URLSearchParams({ userId: String(userId), limit: '1', offset: '0' });
+      const url = `${apiUrl(POINT_HISTORY_PATH)}?${qs.toString()}`;
 
-      const res = await fetch(`${POINT_HISTORY_PATH}?${qs.toString()}`, {
-        credentials: 'include',
-      });
+      const res = await fetch(url, { credentials: 'include' });
       if (!res.ok) throw new Error(`status HTTP ${res.status}`);
 
       const json = await res.json();
@@ -104,44 +100,53 @@ export default function RandomPointManager() {
     setSelectOpen(true);
   }, [canDraw, userId]);
 
-  const draw = useCallback(async () => {
-    setLoadingDraw(true);
-    try {
-      const res = await fetch(POINT_DRAW_PATH, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ userId }),
-      });
+  // ✅ 선택 박스 id도 받아서 보내도록
+  const draw = useCallback(
+    async (boxId) => {
+      setLoadingDraw(true);
+      try {
+        const url = apiUrl(POINT_DRAW_PATH);
 
-      if (res.status === 429) {
-        await refreshStatus();
-        return { ok: false, reason: 'COOLDOWN' };
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ userId, boxId }),
+        });
+
+        if (res.status === 429) {
+          await refreshStatus();
+          return { ok: false, reason: 'COOLDOWN' };
+        }
+        if (!res.ok) throw new Error(`draw HTTP ${res.status}`);
+
+        const json = await res.json();
+        if (!json?.ok) throw new Error('draw ok:false');
+
+        const data = json.data ?? json;
+        const earned = Number(data.earnedPoints ?? data.earnedPoint ?? 0) || 0;
+
+        setEarnedPoint(earned);
+        setSelectOpen(false);
+        setResultOpen(true);
+
+        setRemainSeconds(COOLDOWN_SECONDS);
+        return { ok: true };
+      } finally {
+        setLoadingDraw(false);
       }
+    },
+    [userId, refreshStatus],
+  );
 
-      if (!res.ok) throw new Error(`draw HTTP ${res.status}`);
-
-      const json = await res.json();
-      if (!json?.ok) throw new Error('draw ok:false');
-
-      const data = json.data ?? json;
-      const earned = Number(data.earnedPoints ?? data.earnedPoint ?? 0) || 0;
-
-      setEarnedPoint(earned);
-      setSelectOpen(false);
-      setResultOpen(true);
-
-      setRemainSeconds(COOLDOWN_SECONDS);
-      return { ok: true };
-    } finally {
-      setLoadingDraw(false);
-    }
-  }, [userId, refreshStatus]);
-
-  const handleConfirm = useCallback(async () => {
-    if (loadingDraw) return;
-    await draw();
-  }, [draw, loadingDraw]);
+  const handleConfirm = useCallback(
+    async (selectedBoxId) => {
+      if (loadingDraw) return;
+      if (!selectedBoxId) return;
+      await draw(selectedBoxId);
+    },
+    [draw, loadingDraw],
+  );
 
   return (
     <>
