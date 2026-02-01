@@ -1,14 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Input from '@/components/atoms/Input/Input';
-import Label from '@/components/atoms/Label/Label';
 import { http } from '@/lib/http/client';
-import styles from './page.module.css';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+import { InputEmail } from '@/components/molecules/InputEmail';
+import { InputPassword } from '@/components/molecules/InputPassword';
 
 const EMAIL_MIN_LENGTH = 8;
 const PASSWORD_MIN_LENGTH = 8;
@@ -35,7 +34,7 @@ export default function LoginClient() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -50,6 +49,7 @@ export default function LoginClient() {
 
     const eErr = validateEmail(email);
     const pErr = validatePassword(password);
+
     setEmailError(eErr || '');
     setPasswordError(pErr || '');
     if (eErr || pErr) return;
@@ -66,56 +66,84 @@ export default function LoginClient() {
     }
   };
 
-  const handleGoogleLogin = () => {
-    if (!API_BASE_URL) return;
-    window.location.href = `${API_BASE_URL}/users/auth/google`;
-  };
-
   return (
-    <div className="min-h-full w-full bg-black flex flex-col items-center justify-center px-4 py-8">
-      <form onSubmit={handleSubmit} className={styles.form} noValidate>
-        <h1 className={styles.logo}>
-          최애<span className={styles.logoAccent}>의</span>포토
-        </h1>
+    <main className="min-h-screen w-full bg-black relative">
+      {/* vignette */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.06)_0%,rgba(0,0,0,0.9)_55%,rgba(0,0,0,1)_100%)]" />
 
-        <div className="w-full">
-          <Label htmlFor="login-email" className={styles.label}>
-            이메일
-          </Label>
-          <Input
-            id="login-email"
-            type="email"
-            placeholder="이메일을 입력해 주세요"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className={`${styles.inputField} ${styles.inputFieldNoIcon} ${emailError ? styles.inputError : ''}`}
-          />
-          {emailError && <p className={styles.errorMessage}>{emailError}</p>}
-        </div>
+      <section className="relative min-h-screen flex items-center justify-center px-4 py-8">
+        <form
+          onSubmit={handleSubmit}
+          noValidate
+          className="
+            w-full
+            max-w-[345px]
+            min-[500px]:max-w-[440px]
+            min-[1200px]:max-w-[520px]
+            flex flex-col items-center
+            gap-6
+          "
+        >
+          {/* 로고 */}
+          <div className="flex justify-center mb-1">
+            <Image src="/assets/logos/logo.svg" alt="최애의포토" width={260} height={60} priority />
+          </div>
 
-        <div className="w-full">
-          <Label htmlFor="login-password" className={styles.label}>
-            비밀번호
-          </Label>
-          <Input
-            id="login-password"
-            type={showPassword ? 'text' : 'password'}
-            placeholder="비밀번호를 입력해 주세요"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className={`${styles.inputField} ${passwordError ? styles.inputError : ''}`}
-          />
-          {passwordError && <p className={styles.errorMessage}>{passwordError}</p>}
-        </div>
+          {/* 이메일 (컴포넌트 사용) */}
+          <div className="w-full">
+            <InputEmail
+              label="이메일"
+              placeholder="이메일을 입력해 주세요"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            {emailError && (
+              <p className="mt-1.5 text-[13px] leading-[1.3] text-red-500">{emailError}</p>
+            )}
+          </div>
 
-        <button type="submit" className={styles.loginButton} disabled={loading}>
-          {loading ? '로그인 중...' : '로그인'}
-        </button>
+          {/* 비밀번호 (컴포넌트 사용: eye 포함) */}
+          <div className="w-full">
+            <InputPassword
+              label="비밀번호"
+              placeholder="비밀번호를 입력해 주세요"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            {passwordError && (
+              <p className="mt-1.5 text-[13px] leading-[1.3] text-red-500">{passwordError}</p>
+            )}
+          </div>
 
-        <button type="button" className={styles.googleLoginButton} onClick={handleGoogleLogin}>
-          구글 로그인
-        </button>
-      </form>
-    </div>
+          {/* 로그인 버튼 */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="
+              h-[55px] w-full rounded-[2px]
+              border-2 border-[#efff04] bg-[#efff04]
+              text-[16px] font-bold text-black
+              flex items-center justify-center
+              hover:opacity-95
+              disabled:opacity-60 disabled:cursor-not-allowed
+              mt-2
+            "
+          >
+            {loading ? '로그인 중...' : '로그인'}
+          </button>
+
+          {/* 하단 문구 */}
+          <p className="mt-2 text-center text-[14px] text-white/60">
+            아직 계정이 없으신가요?
+            <Link
+              href="/auth/signup"
+              className="ml-1.5 font-semibold text-[#efff04] hover:underline"
+            >
+              회원가입하기
+            </Link>
+          </p>
+        </form>
+      </section>
+    </main>
   );
 }
