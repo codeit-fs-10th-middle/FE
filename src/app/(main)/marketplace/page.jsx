@@ -121,6 +121,13 @@ export default function MarketplacePage() {
       const items = data?.items ?? [];
       const next = data?.nextCursor ?? null;
 
+      // ✅ 여기 추가 (핵심)
+      console.log('LISTINGS RAW ITEMS:', items);
+      if (items.length >= 2) {
+        console.log('CARD 0 photocard:', items[0]?.photoCard);
+        console.log('CARD 1 photocard:', items[1]?.photoCard);
+      }
+
       const cards = items.map(listingToCard);
 
       setListings((prev) => (append ? [...prev, ...cards] : cards));
