@@ -12,7 +12,8 @@ import Modal from '@/components/atoms/Modal/Modal';
 import CreateCardDropdown from './CreateCardDropdown';
 import FormField from './FormField';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000';
+// ✅ Netlify env 예시: https://be-1-yqrf.onrender.com/api
+const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || '').replace(/\/$/, '');
 
 const GRADE_OPTIONS = [
   { label: 'COMMON', value: 'common' },
@@ -151,7 +152,7 @@ export default function CreateCardForm() {
       return;
     }
 
-    const okTypes = ['image/jpeg', 'image/png', 'image/webp']; // ✅ BE 허용
+    const okTypes = ['image/jpeg', 'image/png', 'image/webp'];
     const okExt = /\.(jpe?g|png|webp)$/i.test(picked.name);
 
     if (!okTypes.includes(picked.type) || !okExt) {
@@ -187,11 +188,11 @@ export default function CreateCardForm() {
     if (submitting) return;
     setSubmitting(true);
 
-    const creatorUserId = 1;
-
     try {
+      if (!API_BASE) throw new Error('NEXT_PUBLIC_API_BASE_URL is missing');
+
       const formData = new FormData();
-      formData.append('creatorUserId', String(creatorUserId));
+      // ✅ 정석: creatorUserId 보내지 않음 (서버가 req.user로 결정)
       formData.append('name', name.trim());
       formData.append('description', desc.trim());
       formData.append('genre', genre);
@@ -200,14 +201,15 @@ export default function CreateCardForm() {
       formData.append('totalSupply', String(Number(total)));
       formData.append('file', file);
 
-      const res = await fetch(`${API_BASE}/api/photo-cards`, {
+      // ✅ env에 /api 포함이므로 /api를 또 붙이지 말 것
+      const res = await fetch(`${API_BASE}/photo-cards`, {
         method: 'POST',
         body: formData,
+        credentials: 'include',
       });
 
       const json = await res.json().catch(() => null);
 
-      // 실패 (서버 응답 있음)
       if (!res.ok) {
         const qs = new URLSearchParams({
           reason: json?.error || json?.message || `HTTP_${res.status}`,
@@ -219,8 +221,7 @@ export default function CreateCardForm() {
         return;
       }
 
-      // 성공
-      const photoCardId = json?.data?.photoCardId;
+      const photoCardId = json?.data?.photoCardId ?? json?.data?.id ?? '';
       const qs = new URLSearchParams({
         id: photoCardId ? String(photoCardId) : '',
         title: name.trim(),
@@ -229,7 +230,6 @@ export default function CreateCardForm() {
 
       router.push(`/create-card/success?${qs}`);
     } catch {
-      // 실패 (네트워크 에러 / CORS 등)
       const qs = new URLSearchParams({
         reason: 'NETWORK_ERROR',
         title: name.trim(),
