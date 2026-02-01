@@ -3,16 +3,91 @@
 import Header from '@/components/layout/Header';
 import Container from '@/components/layout/Container';
 import Image from 'next/image';
+import { useMemo } from 'react';
+import useBreakpoint from '@/hooks/useBreakpoint';
 import { ButtonPrimary } from '@/components/atoms/Button';
 
 export default function Home() {
+  const bp = useBreakpoint();
+  const HERO = useMemo(() => {
+    const img1Src =
+      bp === 'sm'
+        ? '/images/landing/sm/img1.svg'
+        : bp === 'md'
+          ? '/images/landing/md/img1.svg'
+          : '/images/landing/lg/img1.svg';
+
+    if (bp === 'sm') {
+      return {
+        minH: 'min-h-[550px]',
+        textPt: 'pt-[52px]',
+        textH: 'h-[44%]',
+        title: 'text-[32px]',
+        buttonW: '!w-[200px]',
+        buttonH: '!h-[50px]',
+        previewH: 'h-[50%]',
+        img1Src,
+      };
+    }
+
+    if (bp === 'md') {
+      return {
+        minH: 'min-h-[800px]',
+        textPt: 'pt-[64px]',
+        textH: 'h-[42%]',
+        title: 'text-[44px]',
+        buttonW: '!w-[226px]',
+        buttonH: '!h-[55px]',
+        previewH: 'h-[60%]',
+        img1Src,
+      };
+    }
+
+    return {
+      minH: 'min-h-[1350px]',
+      textPt: 'pt-[70px]',
+      textH: 'h-[40%]',
+      title: 'text-[44px]',
+      buttonW: '!w-[226px]',
+      buttonH: '!h-[55px]',
+      previewH: 'h-[75%]',
+      img1Src,
+    };
+  }, [bp]);
+
+  const SECTION_TYPO = useMemo(() => {
+    if (bp === 'sm') {
+      return {
+        title: 'text-[20px] font-bold leading-[1.2] tracking-[-0.02em]',
+        body: 'text-[14px] font-normal leading-[20px]',
+        bodyMt: 'mt-2',
+
+        wrapPt: 'pt-[50px]',
+        textWrap: 'px-5',
+        textMaxW: 'max-w-[320px]',
+        textAlign: 'text-left',
+      };
+    }
+
+    return {
+      title: 'text-[36px] font-bold leading-[1.2] tracking-[-0.02em]',
+      body: 'text-[18px] font-normal leading-[28px]',
+      bodyMt: 'mt-3',
+
+      wrapPt: 'pt-[120px]',
+      textWrap: 'px-10',
+      textMaxW: 'max-w-[560px]',
+      textAlign: 'text-left',
+    };
+  }, [bp]);
+
   return (
     <>
       <Header />
 
       {/* ================= SECTION 1 : HERO ================= */}
-      <section className="relative mt-[13px] min-h-[1100px] bg-neutral-950">
-        {/* bg1 프레임 */}
+      <section className={`relative mt-[13px] bg-neutral-950 overflow-hidden ${HERO.minH}`}>
+        {/* ✅ bg1 프레임(라운드) - 배경은 Container로 유지 */}
         <div className="absolute inset-0 z-0 pointer-events-none">
           <Container className="h-full">
             <div className="relative h-full rounded-[28px] overflow-hidden">
@@ -27,13 +102,15 @@ export default function Home() {
           </Container>
         </div>
 
-        {/* 텍스트 영역 */}
-        <div className="relative z-10 h-[40%] pt-[70px] flex justify-center text-center">
+        {/* ✅ 텍스트 영역 */}
+        <div
+          className={`relative z-20 flex justify-center text-center ${HERO.textH} ${HERO.textPt}`}
+        >
           <Container>
             <div className="mx-auto w-full max-w-[720px]">
               <p className="text-[18px] font-semibold tracking-[-0.02em]">최애의포토</p>
 
-              <h1 className="mt-[18px] text-[44px] leading-[1.25] font-bold tracking-[-0.02em]">
+              <h1 className={`mt-[18px] leading-[1.25] font-bold tracking-[-0.02em] ${HERO.title}`}>
                 구하기 어려웠던
                 <br />
                 <span className="text-lime-400">나의 최애</span>가 여기에!
@@ -44,7 +121,7 @@ export default function Home() {
                   href="/marketplace"
                   thickness="thin"
                   size="M"
-                  className="!w-[226px] !h-[55px] !px-0"
+                  className={`${HERO.buttonW} ${HERO.buttonH} !px-0`}
                 >
                   최애 찾으러 가기
                 </ButtonPrimary>
@@ -53,54 +130,57 @@ export default function Home() {
           </Container>
         </div>
 
-        {/* 하단 프리뷰 이미지 */}
-        <div className="absolute left-1/2 bottom-0 w-screen -translate-x-1/2 h-[80%] pointer-events-none z-[2]">
+        {/* ✅ 하단 프리뷰 이미지: lg/md/sm 각각 파일로 교체 */}
+        <div className={`absolute inset-x-0 bottom-0 pointer-events-none z-10 ${HERO.previewH}`}>
           <Image
-            src="/images/landing/lg/img1.svg"
+            src={HERO.img1Src}
             alt="hero preview"
             fill
             priority
-            className="object-contain object-center"
+            sizes="100vw"
+            className="object-cover object-bottom"
           />
         </div>
       </section>
 
-      {/* ================= BELOW SECTIONS ================= */}
       <main className="bg-neutral-950 text-white">
+        {/* ================= SECTION 2 ================= */}
         <section className="relative bg-neutral-950 overflow-hidden">
-          <div className="relative z-10 h-[800px]">
+          <div className={`relative z-10 ${bp === 'sm' ? 'min-h-[500px]' : 'h-[800px]'}`}>
             <Container className="h-full">
               <div className="relative h-full rounded-[28px] overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
+                {/* bg */}
                 <img
                   src="/images/landing/background/bg2.svg"
                   alt=""
                   aria-hidden
                   className="pointer-events-none absolute z-0 opacity-20"
-                  style={{
-                    left: 80,
-                    top: 500,
-                    width: 1480,
-                    height: 1480,
-                  }}
+                  style={{ left: 80, top: 500, width: 1480, height: 1480 }}
                 />
 
-                <div className="relative z-10 h-full flex flex-col justify-start pt-[120px]">
-                  <div className="text-left max-w-[560px] ml-[200px]">
-                    <h2 className="text-[44px] font-bold leading-[1.2]">
-                      포인트로 <span className="text-lime-400">안전하게</span> 거래하세요
-                    </h2>
-                    <p className="mt-3 text-neutral-300">
-                      내 포토카드를 포인트로 팔고, 원하는 포토카드를
-                      <br />
-                      포인트로 안전하게 교환하세요
-                    </p>
+                <div
+                  className={`relative z-10 h-full flex flex-col justify-start ${SECTION_TYPO.wrapPt}`}
+                >
+                  {/* 텍스트 래퍼 */}
+                  <div className={SECTION_TYPO.textWrap}>
+                    <div className={`${SECTION_TYPO.textAlign} ${SECTION_TYPO.textMaxW}`}>
+                      <h2 className={SECTION_TYPO.title}>
+                        포인트로 <span className="text-lime-400">안전하게</span> 거래하세요
+                      </h2>
+
+                      <p className={`${SECTION_TYPO.bodyMt} ${SECTION_TYPO.body} text-neutral-300`}>
+                        내 포토카드를 포인트로 팔고, 원하는 포토카드를
+                        <br />
+                        포인트로 안전하게 교환하세요
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="mt-[35px] w-[1068px] h-[518px] relative mx-auto">
+                  {/* 이미지 */}
+                  <div className="mt-[35px] relative mx-auto w-full max-w-[1068px] aspect-[1068/518]">
                     <Image
                       src="/images/landing/lg/img2.svg"
-                      alt="포인트로 안전하게 거래하세요"
+                      alt="포인트 거래"
                       fill
                       className="object-contain"
                       priority
@@ -114,41 +194,41 @@ export default function Home() {
 
         {/* ================= SECTION 3 ================= */}
         <section className="relative bg-neutral-950 overflow-hidden">
-          <div className="relative z-10 h-[800px]">
+          <div className={`relative z-10 ${bp === 'sm' ? 'min-h-[500px]' : 'h-[800px]'}`}>
             <Container className="h-full">
-              {/* 프레임 기준점 */}
               <div className="relative h-full rounded-[28px] overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
+                {/* bg */}
                 <img
-                  src="/images/landing/background/bg3.svg" // ← 섹션3 전용 원
+                  src="/images/landing/background/bg3.svg"
                   alt=""
                   aria-hidden
                   className="pointer-events-none absolute z-0 opacity-20"
-                  style={{
-                    left: -80, // ← 좌우 이동
-                    top: 500, // ← 상하 이동
-                    width: 1480,
-                    height: 1480,
-                  }}
+                  style={{ left: -80, top: 500, width: 1480, height: 1480 }}
                 />
 
-                {/* 기존 콘텐츠 */}
-                <div className="relative z-10 h-full flex flex-col justify-start pt-[120px]">
-                  <div className="text-left max-w-[560px] ml-[200px]">
-                    <h2 className="text-[44px] font-bold leading-[1.2]">
-                      알림으로 보다 <span className="text-sky-400">빨라진</span> 거래
-                    </h2>
-                    <p className="mt-3 text-neutral-300">
-                      교환 제안부터 판매 완료까지,
-                      <br />
-                      실시간 알림으로 놓치지 마세요
-                    </p>
+                <div
+                  className={`relative z-10 h-full flex flex-col justify-start ${SECTION_TYPO.wrapPt}`}
+                >
+                  {/* 텍스트 래퍼 */}
+                  <div className={SECTION_TYPO.textWrap}>
+                    <div className={`${SECTION_TYPO.textAlign} ${SECTION_TYPO.textMaxW}`}>
+                      <h2 className={SECTION_TYPO.title}>
+                        알림으로 보다 <span className="text-sky-400">빨라진</span> 거래
+                      </h2>
+
+                      <p className={`${SECTION_TYPO.bodyMt} ${SECTION_TYPO.body} text-neutral-300`}>
+                        교환 제안부터 판매 완료까지,
+                        <br />
+                        실시간 알림으로 놓치지 마세요
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="mt-[35px] mx-auto w-[1068px] h-[518px] relative">
+                  {/* 이미지 */}
+                  <div className="mt-[35px] relative mx-auto w-full max-w-[1068px] aspect-[1068/518]">
                     <Image
                       src="/images/landing/lg/img3.svg"
-                      alt="알림으로 보다 빨라진 거래"
+                      alt="실시간 알림"
                       fill
                       className="object-contain"
                       priority
@@ -161,7 +241,8 @@ export default function Home() {
         </section>
 
         {/* ================= SECTION 4 : RANDOM BOX ================= */}
-        <section className="relative bg-neutral-950 overflow-hidden pb-[80px]">
+        <section className="relative bg-neutral-950 overflow-hidden sm:pb-[80px]">
+          {/* radial bg */}
           <div
             className="absolute inset-0 z-0"
             style={{
@@ -170,24 +251,29 @@ export default function Home() {
             }}
           />
 
-          <div className="relative z-10 h-[800px]">
+          <div className={`relative z-10 ${bp === 'sm' ? 'min-h-[500px]' : 'h-[800px]'}`}>
             <Container className="h-full">
-              <div className="h-full flex flex-col justify-start pt-[120px]">
-                <div className="text-left max-w-[560px] ml-[200px]">
-                  <h2 className="text-[44px] font-bold leading-[1.2]">
-                    랜덤 상자로 <span className="text-lime-400">포인트 받자!</span> 🎉
-                  </h2>
-                  <p className="mt-3 text-neutral-300">
-                    한 시간마다 주어지는 랜덤 상자를 열고,
-                    <br />
-                    포인트를 획득하세요
-                  </p>
+              <div className={`h-full flex flex-col justify-start ${SECTION_TYPO.wrapPt}`}>
+                {/* 텍스트 래퍼 */}
+                <div className={SECTION_TYPO.textWrap}>
+                  <div className={`${SECTION_TYPO.textAlign} ${SECTION_TYPO.textMaxW}`}>
+                    <h2 className={SECTION_TYPO.title}>
+                      랜덤 상자로 <span className="text-lime-400">포인트 받자!</span> 🎉
+                    </h2>
+
+                    <p className={`${SECTION_TYPO.bodyMt} ${SECTION_TYPO.body} text-neutral-300`}>
+                      한 시간마다 주어지는 랜덤 상자를 열고,
+                      <br />
+                      포인트를 획득하세요
+                    </p>
+                  </div>
                 </div>
 
-                <div className="mt-[35px] mx-auto w-[1068px] h-[518px] relative">
+                {/* 이미지 */}
+                <div className="mt-[35px] relative mx-auto w-full max-w-[1068px] aspect-[1068/518]">
                   <Image
                     src="/images/landing/lg/img4.svg"
-                    alt="랜덤 상자 포인트 획득 화면"
+                    alt="랜덤 상자"
                     fill
                     className="object-contain"
                     priority
@@ -198,13 +284,11 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ================= FINAL CTA ================= */}
+        {/* ===== FINAL CTA ===== */}
         <section className="relative bg-neutral-950 overflow-hidden">
           <div className="relative z-10 h-[600px]">
             <Container className="h-full">
-              {/* 가운데 정렬: 텍스트 박스를 기준으로 위 이미지/아래 버튼 배치 */}
               <div className="h-full flex flex-col items-center justify-center text-center">
-                {/* 사진 (경로: /images/landing/Rectangle.jpg) */}
                 <div className="relative mb-[18px]">
                   <Image
                     src="/images/landing/Rectangle.jpg"
@@ -212,23 +296,14 @@ export default function Home() {
                     width={120}
                     height={150}
                     className="object-contain -rotate-12"
-                    priority={false}
                   />
                 </div>
 
-                {/* 텍스트 */}
-                <h2 className="text-[44px] font-bold leading-[1.2]">
-                  나의 최애를 지금 찾아보세요!
-                </h2>
+                <h2 className={SECTION_TYPO.title}>나의 최애를 지금 찾아보세요!</h2>
 
-                {/* 버튼 */}
                 <div className="mt-[24px]">
                   <ButtonPrimary
-<<<<<<< HEAD
-                    href="/market"
-=======
                     href="/marketplace"
->>>>>>> 41c1518 (feat(loginpage) add login page, implemented google login)
                     thickness="thin"
                     size="M"
                     className="!w-[266px] !h-[55px] !px-0"
@@ -243,8 +318,4 @@ export default function Home() {
       </main>
     </>
   );
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 41c1518 (feat(loginpage) add login page, implemented google login)

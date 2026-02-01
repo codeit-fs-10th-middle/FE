@@ -1,0 +1,81 @@
+.page {
+  min-height: 100vh;
+  background: #0b0b0b;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 배경 비네트 */
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(65% 65% at 50% 45%, rgba(255, 255, 255, 0.08) 0%, rgba(0, 0, 0, 0) 60%),
+    radial-gradient(85% 85% at 50% 60%, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.7) 75%);
+}
+
+/* 화면 중앙 정렬 */
+.center {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 48px 24px;
+}
+
+/* 전체 컨테이너 */
+.box {
+  width: 100%;
+  max-width: 980px; /* 넉넉한 데스크탑 폭 */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* Title (로고) */
+.logoWrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 80px; /* ✅ Title pb-[80] */
+}
+
+/* 폼 */
+.form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-items: center; /* Input 중앙 정렬 */
+}
+
+/* InputEmail / InputPassword 공통 폭 */
+.form > * {
+  width: 100%;
+  max-width: 520px; /* 피그마 기준 */
+}
+
+/* 로그인 버튼 */
+.loginBtn {
+  width: 520px;
+  height: 60px;
+
+  margin-top: 40px; /* ✅ 버튼 위 40 */
+  margin-bottom: 40px; /* ✅ 버튼 아래 40 */
+}
+
+/* 하단 안내 문구 */
+.bottomText {
+  margin: 0;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* 회원가입 링크 */
+.joinLink {
+  color: #efff04;
+  font-weight: 700;
+  text-decoration: underline;
+}

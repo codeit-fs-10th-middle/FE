@@ -1,32 +1,10 @@
-// src/components/atoms/Input/Input.jsx
-"use client";
-import styles from "./Input.module.css";
+'use client';
 
-export default function Input({ 
-    type = "text", 
-    placeholder, 
-    value, 
-    onChange, 
-    onBlur,
-    className, 
-    disabled, 
-    required, 
-    id 
-}) {
-    // className이 전달되면 기본 스타일을 적용하지 않음
-    const resolvedClassName = className ? className : (styles.input ?? '');
+import { forwardRef } from 'react';
+import styles from './Input.module.css';
 
-    return (
-        <input
-            id={id}
-            className={resolvedClassName}
-            type={type}
-            placeholder={placeholder}
-            value={value}
-            onChange={onChange}
-            onBlur={onBlur}
-            disabled={disabled}
-            required={required}
-        />
-    );
-}
+const Input = forwardRef(function Input({ type = 'text', className = '', ...props }, ref) {
+  return <input ref={ref} type={type} className={[styles.input, className].join(' ')} {...props} />;
+});
+
+export default Input;

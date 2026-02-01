@@ -28,6 +28,7 @@ body {
 
 body {
   margin: 0;
+  font-family: sans-serif;
 }
 
 /* Ensure predictable sizing everywhere */
@@ -59,4 +60,12 @@ body {
   .rb-mobile-only {
     display: none !important;
   }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none; /* Firefox */
 }

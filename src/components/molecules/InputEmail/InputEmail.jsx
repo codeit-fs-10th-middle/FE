@@ -34,7 +34,7 @@ export default function InputEmail({
     const isValid = browserValid && hasAt;
 
     onValidityChange?.(isValid);
-    onError?.(isValid ? null : 'Please enter a valid email address.');
+    onError?.(isValid ? null : '이메일 형식이 아닙니다.');
     onBlur?.(e);
   };
 

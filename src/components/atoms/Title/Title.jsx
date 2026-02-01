@@ -3,10 +3,12 @@
 // tailwind css 사용, 따로 폰트 적용 added by Taeyoung, 1/21/2026
 'use client';
 
-export default function Title({ text, as = 'h1', showLine = false, className, style }) { //props 추가
+export default function Title({ text, as = 'h1', showLine = false, className, style }) {
+  //props 추가
   const Heading = as;
 
-  return ( //style 추가 tailwind css 사용
+  return (
+    //style 추가 tailwind css 사용
     <div className="flex flex-col gap-4">
       <Heading
         className={`text-white ${className ?? ''}`.trim()}
@@ -21,7 +23,6 @@ export default function Title({ text, as = 'h1', showLine = false, className, st
       >
         {text}
       </Heading>
-      {showLine ? <div style={{ height: 0, width: '1480px', borderTop: '2px solid #EEEEEE' }} /> : null}
     </div>
   );
 }
