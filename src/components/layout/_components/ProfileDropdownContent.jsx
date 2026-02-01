@@ -1,6 +1,10 @@
 'use client';
 
 export default function ProfileDropdownContent({ userName, ownedPoint = 0, onLogout, onNavigate }) {
+  const itemBase =
+    'block w-full text-left px-5 py-3 cursor-pointer text-[14px] font-bold leading-[1] text-white ' +
+    'hover:bg-white/5 hover:text-white focus:outline-none focus:bg-white/5';
+
   return (
     <div className="w-[260px] bg-[#161616]">
       {/* top */}
@@ -17,44 +21,40 @@ export default function ProfileDropdownContent({ userName, ownedPoint = 0, onLog
         </div>
       </div>
 
-      {/* ✅ 회색 구분선 */}
       <div className="h-px w-full bg-white/20" />
 
       {/* menu */}
-      <div className="px-5 py-4">
-        <button
-          type="button"
-          onClick={() => onNavigate('/marketplace')}
-          className="block w-full py-2 text-left text-[14px] font-bold leading-[1] text-white hover:text-white/90"
-        >
+      <div className="py-2">
+        <button type="button" onClick={() => onNavigate('/marketplace')} className={itemBase}>
           마켓플레이스
         </button>
 
-        <button
-          type="button"
-          onClick={() => onNavigate('/mygallery')}
-          className="mt-4 block w-full py-2 text-left text-[14px] font-bold leading-[1] text-white hover:text-white/90"
-        >
+        <button type="button" onClick={() => onNavigate('/mygallery')} className={itemBase}>
           마이갤러리
         </button>
 
         <button
           type="button"
           onClick={() => onNavigate('/mygallery/selling-card')}
-          className="mt-4 block w-full py-2 text-left text-[14px] font-bold leading-[1] text-white hover:text-white/90"
+          className={itemBase}
         >
           판매 중인 포토카드
         </button>
       </div>
 
-      {/* ✅ 회색 구분선 */}
       <div className="h-px w-full bg-white/20" />
 
       {/* logout */}
       <button
         type="button"
         onClick={onLogout}
-        className="w-full px-5 py-4 text-left text-[14px] font-normal text-white/50 hover:bg-white/5 hover:text-white"
+        className="
+          w-full text-left px-5 py-4
+          cursor-pointer
+          text-[14px] font-normal text-white/50
+          hover:bg-white/5 hover:text-white
+          focus:outline-none focus:bg-white/5
+        "
       >
         로그아웃
       </button>
