@@ -13,19 +13,21 @@ import { useMyGalleryCount } from './_components/MyGalleryCountContext';
 
 import styles from './page.module.css';
 
-const DEFAULT_PAGE_SIZE = 15;
+const PAGE_SIZE = 15;
 
-// BE -> FE 카드 필드 매핑 (필드명 확정되면 여기만 수정)
-function mapApiCardToUi(card) {
+/** BE → FE 카드 매핑 */
+function mapMyCardToCard(item) {
+  const pc = item?.photoCard ?? item;
+
   return {
-    id: card.id ?? card.photoCardId ?? card.photocardId,
-    description: card.description ?? card.desc ?? '',
-    owner: card.owner ?? card.ownerName ?? card.userNickname ?? '',
-    category: card.genre ?? card.category ?? 'ALL',
-    rarity: card.grade ?? card.rarity ?? 'COMMON',
-    name: card.name ?? card.title ?? '',
-    imageUrl: card.imageUrl ?? card.image ?? '',
-    minPrice: card.minPrice ?? card.price ?? 0,
+    id: pc?.id ?? item?.cardId ?? item?.id,
+    description: pc?.description ?? '',
+    owner: pc?.ownerNickname ?? pc?.ownerName ?? '',
+    category: pc?.genre ?? pc?.category ?? 'ALL',
+    rarity: pc?.grade ?? pc?.rarity ?? 'COMMON',
+    name: pc?.name ?? '',
+    imageUrl: pc?.imageUrl ?? pc?.image ?? '',
+    minPrice: pc?.minPrice ?? 0,
   };
 }
 
@@ -34,7 +36,6 @@ export default function MyGalleryPage() {
   const bp = useBreakpoint();
   const isMobile = bp === 'sm';
 
-  // ✅ setTitle 추가로 꺼내기 (2번 해결 포인트)
   const { setOwnedCount, setLabel, setTitle } = useMyGalleryCount();
 
   const [search, setSearch] = useState('');
@@ -42,76 +43,57 @@ export default function MyGalleryPage() {
   const [genre, setGenre] = useState('ALL');
 
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(DEFAULT_PAGE_SIZE);
 
   const [items, setItems] = useState([]);
-  const [counts, setCounts] = useState({
-    total: 0,
-    common: 0,
-    rare: 0,
-    superRare: 0,
-    legendary: 0,
-  });
-  const [totalPages, setTotalPages] = useState(1);
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // TODO: 로그인 연동되면 여기서 userId 가져오도록 교체
-  const userId = 1;
-
+  /** ✅ 내 카드 목록 (404 제거 핵심) */
   const fetchMyCards = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
 
-      const qs = new URLSearchParams({
-        page: String(page),
-        pageSize: String(pageSize),
-      });
-
-      const res = await fetch(`/api/photo-cards/users/${userId}?${qs.toString()}`, {
+      const res = await fetch('/users/me/cards', {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
       });
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
       const json = await res.json();
-      if (!json?.ok) throw new Error(json?.error ?? 'API returned ok:false');
+      const rawItems = Array.isArray(json?.data?.items)
+        ? json.data.items
+        : Array.isArray(json?.items)
+          ? json.items
+          : Array.isArray(json?.data)
+            ? json.data
+            : [];
 
-      const data = json.data ?? {};
-      const apiItems = Array.isArray(data.items) ? data.items : [];
+      const mapped = rawItems.map(mapMyCardToCard);
 
-      setItems(apiItems.map(mapApiCardToUi));
-      setCounts(data.counts ?? { total: 0, common: 0, rare: 0, superRare: 0, legendary: 0 });
-
-      const pi = data.pageInfo ?? {};
-      setTotalPages(Number(pi.totalPages ?? 1) || 1);
+      setItems(mapped);
+      setOwnedCount(mapped.length);
     } catch (e) {
       setError(e?.message ?? 'failed to load');
       setItems([]);
-      setCounts({ total: 0, common: 0, rare: 0, superRare: 0, legendary: 0 });
-      setTotalPages(1);
+      setOwnedCount(0);
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, userId]);
+  }, [setOwnedCount]);
 
   useEffect(() => {
     fetchMyCards();
   }, [fetchMyCards]);
 
-  // ✅ 2번 해결: 데스크탑 큰 타이틀을 "마이갤러리"로 고정
+  // 타이틀 고정
   useEffect(() => {
     setTitle?.('마이갤러리');
   }, [setTitle]);
 
-  // (기존) 라벨/카운트
-  useEffect(() => {
-    setLabel?.('유디님이 보유한 포토카드');
-    setOwnedCount(counts.total);
-  }, [counts.total, setOwnedCount, setLabel]);
+  // 라벨은 3번에서 이미 닉네임 처리 완료 상태
+  // 여기선 건드리지 않음
 
   const filteredItems = useMemo(() => {
     return items.filter((c) => {
@@ -124,6 +106,9 @@ export default function MyGalleryPage() {
     });
   }, [items, search, grade, genre]);
 
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / PAGE_SIZE));
+  const pagedItems = filteredItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   useEffect(() => {
     setPage(1);
   }, [search, grade, genre]);
@@ -132,7 +117,17 @@ export default function MyGalleryPage() {
     <div className={styles.listWrapper}>
       {isMobile && <MyGalleryMobileHeader title="마이갤러리" onBack={() => router.back()} />}
 
-      {!isMobile && <GradeChips counts={counts} />}
+      {!isMobile && (
+        <GradeChips
+          counts={{
+            total: filteredItems.length,
+            common: filteredItems.filter((c) => c.rarity === 'COMMON').length,
+            rare: filteredItems.filter((c) => c.rarity === 'RARE').length,
+            superRare: filteredItems.filter((c) => c.rarity === 'SUPER RARE').length,
+            legendary: filteredItems.filter((c) => c.rarity === 'LEGENDARY').length,
+          }}
+        />
+      )}
 
       {!isMobile && <div className="mt-[60px] h-px w-full bg-white/20" />}
 
@@ -155,12 +150,12 @@ export default function MyGalleryPage() {
       {loading && <div className="mt-6 text-sm text-white/60">불러오는 중...</div>}
 
       <div className={styles.cardGrid}>
-        {!loading && filteredItems.length === 0 ? (
+        {!loading && pagedItems.length === 0 ? (
           <div className="col-span-full mt-10 text-center text-white/60">
             보유한 포토카드가 없습니다.
           </div>
         ) : (
-          filteredItems.map((card) => <CardOriginal key={card.id} {...card} />)
+          pagedItems.map((card) => <CardOriginal key={card.id} {...card} />)
         )}
       </div>
 

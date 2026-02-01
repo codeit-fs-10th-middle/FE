@@ -64,7 +64,8 @@ export default function MyGallerySellingPage() {
   const bp = useBreakpoint();
   const isMobile = bp === 'sm';
 
-  const { setOwnedCount, setLabel, setTitle } = useMyGalleryCount();
+  // ✅ setLabel은 판매 페이지에서 건드리지 않음 (마이갤러리에서 세팅된 라벨 유지)
+  const { setOwnedCount, setTitle } = useMyGalleryCount();
 
   const [search, setSearch] = useState('');
   const [grade, setGrade] = useState('ALL');
@@ -96,7 +97,8 @@ export default function MyGallerySellingPage() {
       if (statusParam) qs.set('status', statusParam);
       if (nextCursor) qs.set('cursor', String(nextCursor));
 
-      const url = `/users/me/cards?${qs.toString()}`;
+      // ✅ 404 방지: 프록시 기준 통일 (/api)
+      const url = `/api/users/me/cards?${qs.toString()}`;
       console.log('[selling] request:', url);
 
       const res = await fetch(url, { credentials: 'include' });
@@ -169,11 +171,14 @@ export default function MyGallerySellingPage() {
     }
   }, [page, allCards.length, nextCursor, loading, fetchMore]);
 
+  // ✅ 타이틀/카운트만 갱신 (라벨은 유지)
   useEffect(() => {
     setTitle?.('나의 판매 포토카드');
-    setLabel?.('유디님이 보유한 포토카드');
+  }, [setTitle]);
+
+  useEffect(() => {
     setOwnedCount(allCards.length);
-  }, [allCards.length, setOwnedCount, setLabel, setTitle]);
+  }, [allCards.length, setOwnedCount]);
 
   const filteredCards = useMemo(() => {
     return allCards.filter((c) => {
