@@ -18,19 +18,60 @@ const PAGE_SIZE = 15;
 // ✅ NEXT_PUBLIC_API_BASE_URL만 사용 (뒤 슬래시 제거)
 const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || '').replace(/\/$/, '');
 
-/** BE → FE 카드 매핑 */
+// ✅ grade 표준화 (rare → RARE, SUPER_RARE → SUPER RARE 등)
+function normalizeGrade(v) {
+  const g = String(v ?? '').toUpperCase();
+  if (g === 'SUPER_RARE') return 'SUPER RARE';
+  return g || 'COMMON';
+}
+
+// ✅ 이미지 URL 정규화: /public 제거 + 상대경로면 API_BASE 붙이기
+function normalizeImageUrl(url) {
+  if (!url) return null;
+  let u = String(url);
+
+  if (u.startsWith('/public/')) u = u.replace('/public', '');
+
+  if (u.startsWith('/')) {
+    if (!API_BASE) return u; // base 없으면 일단 상대경로 유지
+    return `${API_BASE}${u}`;
+  }
+
+  return u;
+}
+
+/** ✅ BE → CardOriginal props로 매핑 */
 function mapMyCardToCard(item) {
+  // users/me/cards 응답이 userCard(=photoCard 래핑)일 수도 있고, 그냥 photoCard일 수도 있음
   const pc = item?.photoCard ?? item;
 
+  const grade = normalizeGrade(pc?.grade ?? pc?.rarity);
+  const category = pc?.genre ?? pc?.category ?? 'ALL';
+
+  const quantity = Number(item?.quantity ?? pc?.quantity ?? 0);
+
+  // ✅ 제목은 name 우선 (CardOriginal은 description을 타이틀처럼 보여주니까 여기로 넣음)
+  const title = pc?.name ?? pc?.title ?? pc?.description ?? '';
+
+  // ✅ 가격: minPrice / min_price 우선
+  const minPrice = Number(pc?.minPrice ?? pc?.min_price ?? 0);
+
+  const imageSrc =
+    normalizeImageUrl(pc?.imageUrl ?? pc?.image_url ?? pc?.image) ||
+    '/assets/products/photo-card.svg';
+
   return {
-    id: pc?.id ?? item?.cardId ?? item?.id,
-    description: pc?.description ?? '',
+    id: item?.user_card_id ?? pc?.id ?? item?.id,
+
+    // CardOriginal이 받는 키들
+    rarity: grade,
+    category,
     owner: pc?.ownerNickname ?? pc?.ownerName ?? '',
-    category: pc?.genre ?? pc?.category ?? 'ALL',
-    rarity: pc?.grade ?? pc?.rarity ?? 'COMMON',
-    name: pc?.name ?? '',
-    imageUrl: pc?.imageUrl ?? pc?.image ?? '',
-    minPrice: pc?.minPrice ?? 0,
+    description: title,
+    price: `${minPrice} P`,
+    remaining: quantity,
+    outof: quantity,
+    imageSrc,
   };
 }
 
@@ -44,7 +85,6 @@ export default function MyGalleryPage() {
   const [search, setSearch] = useState('');
   const [grade, setGrade] = useState('ALL');
   const [genre, setGenre] = useState('ALL');
-
   const [page, setPage] = useState(1);
 
   const [items, setItems] = useState([]);
@@ -98,16 +138,29 @@ export default function MyGalleryPage() {
     setTitle?.('마이갤러리');
   }, [setTitle]);
 
+  // ✅ 필터 적용 (search/grade/genre)
   const filteredItems = useMemo(() => {
     return items.filter((c) => {
-      const okSearch = search
-        ? `${c.description} ${c.owner} ${c.category}`.toLowerCase().includes(search.toLowerCase())
-        : true;
+      const hay = `${c.description ?? ''} ${c.owner ?? ''} ${c.category ?? ''}`.toLowerCase();
+
+      const okSearch = search ? hay.includes(search.toLowerCase()) : true;
       const okGrade = grade === 'ALL' ? true : c.rarity === grade;
       const okGenre = genre === 'ALL' ? true : c.category === genre;
+
       return okSearch && okGrade && okGenre;
     });
   }, [items, search, grade, genre]);
+
+  // ✅ chips counts (필터된 기준으로 보여주고 싶으면 filteredItems, 전체 기준이면 items)
+  const counts = useMemo(() => {
+    const src = filteredItems;
+    return {
+      common: src.filter((c) => c.rarity === 'COMMON').length,
+      rare: src.filter((c) => c.rarity === 'RARE').length,
+      superRare: src.filter((c) => c.rarity === 'SUPER RARE').length,
+      legendary: src.filter((c) => c.rarity === 'LEGENDARY').length,
+    };
+  }, [filteredItems]);
 
   const totalPages = Math.max(1, Math.ceil(filteredItems.length / PAGE_SIZE));
   const pagedItems = filteredItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -120,17 +173,7 @@ export default function MyGalleryPage() {
     <div className={styles.listWrapper}>
       {isMobile && <MyGalleryMobileHeader title="마이갤러리" onBack={() => router.back()} />}
 
-      {!isMobile && (
-        <GradeChips
-          counts={{
-            total: filteredItems.length,
-            common: filteredItems.filter((c) => c.rarity === 'COMMON').length,
-            rare: filteredItems.filter((c) => c.rarity === 'RARE').length,
-            superRare: filteredItems.filter((c) => c.rarity === 'SUPER RARE').length,
-            legendary: filteredItems.filter((c) => c.rarity === 'LEGENDARY').length,
-          }}
-        />
-      )}
+      {!isMobile && <GradeChips counts={counts} />}
 
       {!isMobile && <div className="mt-[60px] h-px w-full bg-white/20" />}
 
