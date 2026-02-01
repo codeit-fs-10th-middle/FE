@@ -1,7 +1,6 @@
 'use client';
 import Link from 'next/link';
 import styles from './CardOriginal.module.css';
-import Image from 'next/image';
 import Label from '../../atoms/Label/Label';
 
 export default function CardOriginal({
@@ -17,7 +16,27 @@ export default function CardOriginal({
   detailHref,
 }) {
   const imageNode = (
-    <Image src={imageSrc} alt="Photo Card" width={400} height={400} className={styles.cardImage} />
+    <img
+      src={imageSrc}
+      alt="Photo Card"
+      className={styles.cardImage}
+      loading="lazy"
+      onError={(e) => {
+        e.currentTarget.src = '/assets/products/photo-card.svg';
+      }}
+    />
+  );
+
+  const logoNode = (
+    <img
+      src="/assets/logos/logo.svg"
+      alt="Logo"
+      className={styles.logo}
+      loading="lazy"
+      onError={(e) => {
+        e.currentTarget.style.display = 'none';
+      }}
+    />
   );
 
   return (
@@ -73,15 +92,7 @@ export default function CardOriginal({
 
       {/* Footer Logo */}
       <div className={styles.footer}>
-        <span className={styles.logo}>
-          <Image
-            src="/assets/logos/logo.svg"
-            alt="Logo"
-            width={100}
-            height={100}
-            className={styles.logo}
-          />
-        </span>
+        <span className={styles.logo}>{logoNode}</span>
       </div>
     </div>
   );
