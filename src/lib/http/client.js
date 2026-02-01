@@ -12,7 +12,6 @@ export const http = axios.create({
 http.interceptors.response.use(
   (response) => response,
   (error) => {
-    // TODO: 공통 에러 처리 (401, 403, 500)
     return Promise.reject(error);
   },
 );
