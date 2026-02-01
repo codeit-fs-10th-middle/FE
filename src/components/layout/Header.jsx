@@ -8,7 +8,10 @@ import { useRouter } from 'next/navigation';
 import Container from '@/components/layout/Container';
 import { http } from '@/lib/http/client';
 
-export default function Header({ onOpenAlarm }) {
+import AlarmDropdownContent from './_components/AlarmDropdownContent';
+import ProfileDropdownContent from './_components/ProfileDropdownContent';
+
+export default function Header() {
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -23,17 +26,18 @@ export default function Header({ onOpenAlarm }) {
   const menuTriggerRef = useRef(null);
 
   // =====================
-  // profile dropdown (absolute)
+  // profile dropdown
   // =====================
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileWrapRef = useRef(null);
 
   // =====================
-  // alarm dropdown (absolute)
+  // alarm dropdown
   // =====================
-  const [isAlarmOn] = useState(true); // 임시: 알림 있음
+  const [isAlarmOn] = useState(true); // TODO: 나중에 unreadCount > 0로 교체
   const [isAlarmOpen, setIsAlarmOpen] = useState(false);
-  const alarmWrapRef = useRef(null);
+  const alarmWrapRefDesktop = useRef(null);
+  const alarmWrapRefMobile = useRef(null);
 
   const mockAlarms = [
     { id: 1, message: '김머누님이 [RARE] 우리집 앞마당을 1장 구매했습니다.', timeText: '1시간 전' },
@@ -94,6 +98,7 @@ export default function Header({ onOpenAlarm }) {
 
   useEffect(() => {
     function handleClickOutside(e) {
+      // mobile menu
       if (
         menuRef.current &&
         !menuRef.current.contains(e.target) &&
@@ -102,10 +107,18 @@ export default function Header({ onOpenAlarm }) {
       ) {
         setIsMenuOpen(false);
       }
+
+      // profile dropdown
       if (profileWrapRef.current && !profileWrapRef.current.contains(e.target)) {
         setIsProfileOpen(false);
       }
-      if (alarmWrapRef.current && !alarmWrapRef.current.contains(e.target)) {
+
+      // alarm dropdown (desktop or mobile)
+      const inDesktop =
+        alarmWrapRefDesktop.current && alarmWrapRefDesktop.current.contains(e.target);
+      const inMobile = alarmWrapRefMobile.current && alarmWrapRefMobile.current.contains(e.target);
+
+      if (!inDesktop && !inMobile) {
         setIsAlarmOpen(false);
       }
     }
@@ -117,8 +130,10 @@ export default function Header({ onOpenAlarm }) {
   const displayName = user?.nickname ?? user?.email ?? '';
   const points = user?.points ?? 0;
 
+  const alarmIconSrc = isAlarmOn ? '/assets/icons/ic_alarm_on.svg' : '/assets/icons/ic_alarm.svg';
+
   return (
-    <header className="w-full bg-black">
+    <header className="sticky top-0 z-50 w-full bg-black">
       <Container className="flex h-[72px] items-center justify-between">
         {/* ================= Desktop (>= 768px) ================= */}
         <div className="hidden min-[768px]:flex min-[768px]:w-full min-[768px]:items-center min-[768px]:justify-between">
@@ -136,16 +151,62 @@ export default function Header({ onOpenAlarm }) {
                   <span>P</span>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={onOpenAlarm}
-                  className="rounded p-2 text-white/70 hover:bg-white/10 hover:text-white"
-                  aria-label="알림"
-                >
-                  🔔
-                </button>
+                {/* ✅ Desktop Alarm */}
+                <div ref={alarmWrapRefDesktop} className="relative">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsAlarmOpen((v) => !v);
+                      setIsProfileOpen(false);
+                    }}
+                    className="rounded p-2 text-white/70 hover:bg-white/10 hover:text-white"
+                    aria-label="알림"
+                  >
+                    <Image src={alarmIconSrc} alt="알림" width={24} height={24} />
+                  </button>
 
-                <span>{displayName}</span>
+                  {isAlarmOpen && (
+                    <div
+                      className="absolute right-0 top-[calc(100%+10px)] z-[9999] overflow-hidden rounded-[12px] shadow-[0_10px_30px_rgba(0,0,0,0.45)]"
+                      role="menu"
+                    >
+                      <AlarmDropdownContent items={mockAlarms} />
+                    </div>
+                  )}
+                </div>
+
+                {/* ✅ Desktop Profile */}
+                <div ref={profileWrapRef} className="relative">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsProfileOpen((v) => !v);
+                      setIsAlarmOpen(false);
+                    }}
+                    className="rounded px-2 py-2 text-white/80 hover:bg-white/10 hover:text-white"
+                    aria-label="프로필 메뉴"
+                  >
+                    {displayName}
+                  </button>
+
+                  {isProfileOpen && (
+                    <div
+                      className="absolute right-0 top-[calc(100%+10px)] z-[9999] overflow-hidden rounded-[12px] shadow-[0_10px_30px_rgba(0,0,0,0.45)]"
+                      role="menu"
+                    >
+                      <ProfileDropdownContent
+                        userName={displayName}
+                        ownedPoint={Number(points) || 0}
+                        onLogout={handleLogout}
+                        onNavigate={(href) => {
+                          setIsProfileOpen(false);
+                          router.push(href);
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+
                 <span className="mx-1 h-4 w-px bg-white/20" />
 
                 <button
@@ -224,30 +285,22 @@ export default function Header({ onOpenAlarm }) {
 
           <div className="flex min-w-0 flex-1 justify-end">
             {user ? (
-              <div ref={alarmWrapRef} className="relative">
+              <div ref={alarmWrapRefMobile} className="relative">
                 <button
                   type="button"
                   onClick={() => {
                     setIsAlarmOpen((v) => !v);
                     setIsProfileOpen(false);
                   }}
-                  className="relative rounded p-2 hover:bg-white/10"
+                  className="rounded p-2 hover:bg-white/10"
                   aria-label="알림"
                 >
-                  <Image
-                    src={isAlarmOn ? '/assets/icons/ic_alarm_on.svg' : '/assets/icons/ic_alarm.svg'}
-                    alt=""
-                    width={24}
-                    height={24}
-                  />
-                  {isAlarmOn && (
-                    <span className="absolute right-[9px] top-[9px] h-[6px] w-[6px] rounded-full bg-red-500" />
-                  )}
+                  <Image src={alarmIconSrc} alt="알림" width={24} height={24} />
                 </button>
 
                 {isAlarmOpen && (
                   <div
-                    className="absolute right-0 top-[calc(100%+10px)] z-[9999] h-[535px] w-[300px] overflow-hidden rounded bg-[#2b2b2b] shadow-[0_10px_30px_rgba(0,0,0,0.45)]"
+                    className="absolute right-0 top-[calc(100%+10px)] z-[9999] overflow-hidden rounded-[12px] shadow-[0_10px_30px_rgba(0,0,0,0.45)]"
                     role="menu"
                   >
                     <AlarmDropdownContent items={mockAlarms} />
