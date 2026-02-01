@@ -36,7 +36,7 @@ export default function MyGalleryPage() {
   const bp = useBreakpoint();
   const isMobile = bp === 'sm';
 
-  const { setOwnedCount, setLabel, setTitle } = useMyGalleryCount();
+  const { setOwnedCount, setTitle } = useMyGalleryCount();
 
   const [search, setSearch] = useState('');
   const [grade, setGrade] = useState('ALL');
@@ -54,7 +54,8 @@ export default function MyGalleryPage() {
       setLoading(true);
       setError('');
 
-      const res = await fetch('/users/me/cards', {
+      // ✅ Netlify 배포 환경: 반드시 /api 프록시로 호출
+      const res = await fetch('/api/users/me/cards', {
         method: 'GET',
         credentials: 'include',
       });
@@ -91,9 +92,6 @@ export default function MyGalleryPage() {
   useEffect(() => {
     setTitle?.('마이갤러리');
   }, [setTitle]);
-
-  // 라벨은 3번에서 이미 닉네임 처리 완료 상태
-  // 여기선 건드리지 않음
 
   const filteredItems = useMemo(() => {
     return items.filter((c) => {
