@@ -15,6 +15,9 @@ import styles from './page.module.css';
 
 const PAGE_SIZE = 15;
 
+// ✅ 환경 대응: 기본은 /api 프록시, 없으면 NEXT_PUBLIC_API_BASE_URL로 직접 BE 지정
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? '/api';
+
 function mapMyCardToCard(item) {
   // listing 래핑 형태(판매등록) or 단순 카드(보유)
   const listing = item?.listingId ? item : (item?.listing ?? null);
@@ -87,83 +90,84 @@ export default function MyGallerySellingPage() {
     return null; // ✅ ALL
   }, [soldOut]);
 
-  const fetchMore = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError('');
+  // ✅ cursorOverride로 리셋 직후 안정화
+  const fetchMore = useCallback(
+    async (cursorOverride) => {
+      try {
+        setLoading(true);
+        setError('');
 
-      const qs = new URLSearchParams();
-      qs.set('limit', '50');
-      if (statusParam) qs.set('status', statusParam);
-      if (nextCursor) qs.set('cursor', String(nextCursor));
+        const qs = new URLSearchParams();
+        qs.set('limit', '50');
+        if (statusParam) qs.set('status', statusParam);
 
-      // ✅ 404 방지: 프록시 기준 통일 (/api)
-      const url = `/api/users/me/cards?${qs.toString()}`;
-      console.log('[selling] request:', url);
+        const cursorToUse = cursorOverride !== undefined ? cursorOverride : nextCursor;
+        if (cursorToUse) qs.set('cursor', String(cursorToUse));
 
-      const res = await fetch(url, { credentials: 'include' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const url = `${API_BASE}/users/me/cards?${qs.toString()}`;
+        console.log('[selling] request:', url);
 
-      const json = await res.json();
+        const res = await fetch(url, { credentials: 'include' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      const rawItems = Array.isArray(json?.data?.items)
-        ? json.data.items
-        : Array.isArray(json?.items)
-          ? json.items
-          : Array.isArray(json?.data)
-            ? json.data
-            : [];
+        const json = await res.json();
 
-      console.log('[selling] response keys:', Object.keys(json ?? {}));
-      console.log('[selling] rawItems length:', rawItems.length);
-      console.log('[selling] rawItems[0]:', rawItems?.[0]);
+        const rawItems = Array.isArray(json?.data?.items)
+          ? json.data.items
+          : Array.isArray(json?.items)
+            ? json.items
+            : Array.isArray(json?.data)
+              ? json.data
+              : [];
 
-      // ✅ 판매등록된 것만 (status/ listing 존재 기반으로 최대한 안전하게)
-      const onlySelling = rawItems.filter((x) => {
-        const listing = x?.listingId ? x : x?.listing;
-        const status =
-          listing?.status ?? x?.status ?? x?.listingStatus ?? listing?.listingStatus ?? null;
+        console.log('[selling] response keys:', Object.keys(json ?? {}));
+        console.log('[selling] rawItems length:', rawItems.length);
+        console.log('[selling] rawItems[0]:', rawItems?.[0]);
 
-        const hasListing = Boolean(listing) || status != null;
+        // ✅ 판매등록된 것만 (status/ listing 존재 기반으로 최대한 안전하게)
+        const onlySelling = rawItems.filter((x) => {
+          const listing = x?.listingId ? x : x?.listing;
+          const status =
+            listing?.status ?? x?.status ?? x?.listingStatus ?? listing?.listingStatus ?? null;
 
-        // status가 아예 없으면 판매등록 여부 판단 불가 → 일단 제외(= selling page니까)
-        if (!hasListing) return false;
+          const hasListing = Boolean(listing) || status != null;
+          if (!hasListing) return false;
 
-        return status === 'ACTIVE' || status === 'SOLD_OUT' || status === 'ON_SALE';
-      });
+          return status === 'ACTIVE' || status === 'SOLD_OUT' || status === 'ON_SALE';
+        });
 
-      console.log('[selling] onlySelling length:', onlySelling.length);
-      console.log('[selling] onlySelling[0]:', onlySelling?.[0]);
+        const mapped = onlySelling.map(mapMyCardToCard);
 
-      const mapped = onlySelling.map(mapMyCardToCard);
+        setAllCards((prev) => {
+          const existed = new Set(prev.map((x) => x.id));
+          return [...prev, ...mapped.filter((m) => !existed.has(m.id))];
+        });
 
-      setAllCards((prev) => {
-        const existed = new Set(prev.map((x) => x.id));
-        const merged = [...prev, ...mapped.filter((m) => !existed.has(m.id))];
-        console.log('[selling] merged length:', merged.length);
-        return merged;
-      });
+        setNextCursor(json?.data?.nextCursor ?? json?.nextCursor ?? null);
+      } catch (e) {
+        console.error('[selling] fetch error:', e);
+        setError(e?.message ?? 'failed to load');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [nextCursor, statusParam],
+  );
 
-      setNextCursor(json?.data?.nextCursor ?? json?.nextCursor ?? null);
-    } catch (e) {
-      console.error('[selling] fetch error:', e);
-      setError(e?.message ?? 'failed to load');
-    } finally {
-      setLoading(false);
-    }
-  }, [nextCursor, statusParam]);
-
+  // soldOut 바뀌면 전체 리셋
   useEffect(() => {
     setAllCards([]);
     setNextCursor(null);
     setPage(1);
   }, [soldOut]);
 
+  // ✅ 리셋 직후 첫 호출은 cursor를 null로 강제
   useEffect(() => {
-    fetchMore();
+    fetchMore(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [soldOut]);
 
+  // 페이지 기반으로 추가 로딩
   useEffect(() => {
     const need = page * PAGE_SIZE;
     if (allCards.length < need && nextCursor && !loading) {
