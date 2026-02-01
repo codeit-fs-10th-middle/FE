@@ -2,6 +2,7 @@
 'use client';
 
 import { useMemo, useRef, useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 
 import Input from '@/components/atoms/Input/Input';
 import TextBox from '@/components/atoms/TextBox/TextBox';
@@ -11,17 +12,26 @@ import Modal from '@/components/atoms/Modal/Modal';
 import CreateCardDropdown from './CreateCardDropdown';
 import FormField from './FormField';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000';
+
 const GRADE_OPTIONS = [
-  { label: 'COMMON', value: 'COMMON' },
-  { label: 'RARE', value: 'RARE' },
-  { label: 'SUPER RARE', value: 'SUPER RARE' },
-  { label: 'LEGENDARY', value: 'LEGENDARY' },
+  { label: 'COMMON', value: 'common' },
+  { label: 'RARE', value: 'rare' },
+  { label: 'SUPER RARE', value: 'epic' }, // BE: epic
+  { label: 'LEGENDARY', value: 'legendary' },
 ];
 
 const GENRE_OPTIONS = [
-  { label: '풍경', value: '풍경' },
-  { label: '여행', value: '여행' },
-  { label: '인물', value: '인물' },
+  { label: '앨범', value: '앨범' },
+  { label: '특전', value: '특전' },
+  { label: '팬싸', value: '팬싸' },
+  { label: '시즌그리팅', value: '시즌그리팅' },
+  { label: '팬미팅', value: '팬미팅' },
+  { label: '콘서트', value: '콘서트' },
+  { label: 'MD', value: 'MD' },
+  { label: '콜라보', value: '콜라보' },
+  { label: '팬클럽', value: '팬클럽' },
+  { label: '기타', value: '기타' },
 ];
 
 const FIELD_TEXT =
@@ -53,19 +63,10 @@ const FILE_BUTTON_CLASS = `
   !shadow-none
 `.trim();
 
-// ✅ 피그마처럼: (disabled) 회색 버튼이길 원하면 여기 수정
-const SUBMIT_BUTTON_CLASS = `
-  !h-[60px]
-  !rounded-[2px]
-  !text-[18px]
-  !font-bold
-  !leading-[1]
-  !tracking-[0]
-`.trim();
-
 const onlyDigits = (v) => v.replace(/\D/g, '');
 
 export default function CreateCardForm() {
+  const router = useRouter();
   const fileInputRef = useRef(null);
 
   // values
@@ -79,6 +80,9 @@ export default function CreateCardForm() {
 
   // modal
   const [fileErrorOpen, setFileErrorOpen] = useState(false);
+
+  // submitting
+  const [submitting, setSubmitting] = useState(false);
 
   // touched
   const [touched, setTouched] = useState({
@@ -139,7 +143,36 @@ export default function CreateCardForm() {
     refs[first]?.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, [errors]);
 
-  const handleSubmit = (e) => {
+  const openFilePicker = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    fileInputRef.current?.click();
+  };
+
+  const handlePickFile = (e) => {
+    const picked = e.target.files?.[0] ?? null;
+
+    if (!picked) {
+      setTouched((t) => ({ ...t, file: true }));
+      return;
+    }
+
+    const okTypes = ['image/jpeg', 'image/png', 'image/webp']; // ✅ BE 허용
+    const okExt = /\.(jpe?g|png|webp)$/i.test(picked.name);
+
+    if (!okTypes.includes(picked.type) || !okExt) {
+      setFile(null);
+      setTouched((t) => ({ ...t, file: true }));
+      setFileErrorOpen(true);
+      e.target.value = '';
+      return;
+    }
+
+    setFile(picked);
+    setTouched((t) => ({ ...t, file: true }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     setTouched({
@@ -157,48 +190,51 @@ export default function CreateCardForm() {
       return;
     }
 
-    console.log({
-      name: name.trim(),
-      grade,
-      genre,
-      price: Number(price),
-      total: Number(total),
-      desc: desc.trim(),
-      file,
-    });
-  };
+    if (submitting) return;
+    setSubmitting(true);
 
-  // ✅ “파일 선택”은 제출이 아니라 파일창만 열기
-  const openFilePicker = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    fileInputRef.current?.click();
-  };
+    // TODO: 로그인 연동되면 실제 userId로 교체
+    const creatorUserId = 1;
 
-  const handlePickFile = (e) => {
-    const picked = e.target.files?.[0] ?? null;
+    try {
+      const formData = new FormData();
+      formData.append('creatorUserId', String(creatorUserId));
+      formData.append('name', name.trim());
+      formData.append('description', desc.trim());
+      formData.append('genre', genre);
+      formData.append('grade', grade); // common/rare/epic/legendary
+      formData.append('minPrice', String(Number(price)));
+      formData.append('totalSupply', String(Number(total)));
+      formData.append('file', file); // ✅ multer.single("file")
 
-    // 사용자가 취소한 경우: 여기서 touched 처리해서 에러 노출 가능
-    if (!picked) {
-      setTouched((t) => ({ ...t, file: true }));
-      return;
+      const res = await fetch(`${API_BASE}/api/photo-cards`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const json = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        const qs = new URLSearchParams({
+          reason: json?.error || json?.message || `HTTP_${res.status}`,
+        }).toString();
+        router.push(`/create-card/fail?${qs}`);
+        return;
+      }
+
+      const photoCardId = json?.data?.photoCardId;
+      const qs = new URLSearchParams({
+        id: photoCardId ? String(photoCardId) : '',
+        title: name.trim(),
+        grade,
+      }).toString();
+
+      router.push(`/create-card/success?${qs}`);
+    } catch {
+      router.push('/create-card/fail?reason=NETWORK_ERROR');
+    } finally {
+      setSubmitting(false);
     }
-
-    const okTypes = ['image/jpeg', 'image/png'];
-    const okExt = /\.(jpe?g|png)$/i.test(picked.name);
-
-    if (!okTypes.includes(picked.type) || !okExt) {
-      setFile(null);
-      setTouched((t) => ({ ...t, file: true }));
-      setFileErrorOpen(true);
-
-      // 같은 파일 다시 선택 가능하게 value 초기화
-      e.target.value = '';
-      return;
-    }
-
-    setFile(picked);
-    setTouched((t) => ({ ...t, file: true }));
   };
 
   return (
@@ -303,7 +339,7 @@ export default function CreateCardForm() {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/png, image/jpeg"
+                accept="image/png, image/jpeg, image/webp"
                 className="hidden"
                 onChange={handlePickFile}
               />
@@ -313,6 +349,7 @@ export default function CreateCardForm() {
                 size="s"
                 thickness="thin"
                 className={FILE_BUTTON_CLASS}
+                style={{ color: '#efff04' }}
                 onClick={openFilePicker}
               >
                 파일 선택
@@ -362,23 +399,22 @@ export default function CreateCardForm() {
             size="l"
             thickness="thin"
             fullWidth
-            disabled={!isValid}
+            disabled={!isValid || submitting}
             className={
-              isValid
-                ? '!text-black !bg-main hover:!bg-main'
-                : '!text-gray-300 !bg-gray-600 cursor-not-allowed'
+              !isValid || submitting
+                ? '!text-gray-300 !bg-gray-600 cursor-not-allowed'
+                : '!text-black !bg-main hover:!bg-main'
             }
           >
-            생성하기
+            {submitting ? '생성 중...' : '생성하기'}
           </ButtonPrimary>
         </div>
       </form>
 
-      {/* 잘못된 파일 형식 모달 */}
       <Modal open={fileErrorOpen} onClose={() => setFileErrorOpen(false)} size="sm">
         <div className="flex flex-col gap-4">
           <h3 className="text-lg font-bold">업로드 불가</h3>
-          <p className="text-sm text-gray-300">JPG 또는 PNG 파일만 업로드할 수 있습니다.</p>
+          <p className="text-sm text-gray-300">JPG / PNG / WEBP 파일만 업로드할 수 있습니다.</p>
           <div className="flex justify-end">
             <ButtonPrimary
               type="button"
