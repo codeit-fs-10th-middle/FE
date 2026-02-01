@@ -29,6 +29,12 @@ function validatePassword(value) {
 }
 
 export default function LoginClient() {
+  // ✅ env 값 + axios baseURL 동시에 확인
+  useEffect(() => {
+    console.log('API BASE (env):', process.env.NEXT_PUBLIC_API_BASE_URL);
+    console.log('API BASE (axios):', http.defaults.baseURL);
+  }, []);
+
   const router = useRouter();
   const searchParams = useSearchParams();
 
