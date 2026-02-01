@@ -5,7 +5,7 @@ export default function MainLayout({ children }) {
   return (
     <>
       <Header />
-      <RandomPointManager /> {/* ✅ 전역 랜덤 포인트 */}
+      <RandomPointManager />
       <main
         style={{
           minHeight: 'calc(100vh - 120px)',
