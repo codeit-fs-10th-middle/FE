@@ -7,7 +7,12 @@ import RandomPointResultModal from './RandomPointResultModal';
 const COOLDOWN_SECONDS = 60 * 60;
 const POLL_MS = 30 * 1000;
 
-const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || '').replace(/\/$/, '');
+// ✅ /api 프록시로 통일 (Netlify redirect 사용)
+const API_PREFIX = '/api';
+
+// ✅ 백엔드 라우트에 맞게 여기만 바꾸면 됨
+const POINT_DRAW_PATH = `${API_PREFIX}/point-box-draws/draw`;
+const POINT_HISTORY_PATH = `${API_PREFIX}/point-box-draws/draw-history`; // <- 백엔드가 다르면 여기 변경
 
 function pad2(n) {
   return String(n).padStart(2, '0');
@@ -19,7 +24,6 @@ function formatRemain(seconds) {
   const ss = s % 60;
   return `${h}시간 ${pad2(m)}분 ${pad2(ss)}초`;
 }
-
 function parseDateSafe(v) {
   const d = new Date(v);
   return Number.isNaN(d.getTime()) ? null : d;
@@ -34,16 +38,13 @@ export default function RandomPointManager() {
 
   const [earnedPoint, setEarnedPoint] = useState(0);
   const [remainSeconds, setRemainSeconds] = useState(COOLDOWN_SECONDS);
-
   const [loadingDraw, setLoadingDraw] = useState(false);
 
-  // 같은 “기회”에서 여러 번 자동 오픈 방지
   const lastAutoOpenKeyRef = useRef(null);
 
   const timeText = useMemo(() => formatRemain(remainSeconds), [remainSeconds]);
   const canDraw = remainSeconds <= 0;
 
-  // 1초 카운트다운(표시용)
   useEffect(() => {
     const t = setInterval(() => {
       setRemainSeconds((prev) => Math.max(0, prev - 1));
@@ -51,13 +52,11 @@ export default function RandomPointManager() {
     return () => clearInterval(t);
   }, []);
 
-  // 최근 뽑기 시각 기반으로 remaining 계산
   const refreshStatus = useCallback(async () => {
     try {
-      if (!API_BASE) return; // 배포 환경변수 누락 시 조용히 중단
-
       const qs = new URLSearchParams({ userId: String(userId), limit: '1', offset: '0' });
-      const res = await fetch(`${API_BASE}/point-box-draws/draw-history?${qs.toString()}`, {
+
+      const res = await fetch(`${POINT_HISTORY_PATH}?${qs.toString()}`, {
         credentials: 'include',
       });
       if (!res.ok) throw new Error(`status HTTP ${res.status}`);
@@ -80,23 +79,19 @@ export default function RandomPointManager() {
         return;
       }
 
-      const now = Date.now();
-      const diffSec = Math.floor((now - lastAt.getTime()) / 1000);
-      const remain = COOLDOWN_SECONDS - diffSec;
-      setRemainSeconds(Math.max(0, remain));
+      const diffSec = Math.floor((Date.now() - lastAt.getTime()) / 1000);
+      setRemainSeconds(Math.max(0, COOLDOWN_SECONDS - diffSec));
     } catch {
-      // 여기서 에러 로그 안 찍는 이유: 배포에서 콘솔 도배 방지
+      // ignore
     }
   }, [userId]);
 
-  // 폴링
   useEffect(() => {
-    refreshStatus(); // 최초 1회
+    refreshStatus();
     const t = setInterval(refreshStatus, POLL_MS);
     return () => clearInterval(t);
   }, [refreshStatus]);
 
-  // canDraw true 되는 순간 자동 오픈
   useEffect(() => {
     if (!canDraw) return;
 
@@ -112,9 +107,7 @@ export default function RandomPointManager() {
   const draw = useCallback(async () => {
     setLoadingDraw(true);
     try {
-      if (!API_BASE) throw new Error('NEXT_PUBLIC_API_BASE_URL is missing');
-
-      const res = await fetch(`${API_BASE}/point-box-draws/draw`, {
+      const res = await fetch(POINT_DRAW_PATH, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -150,21 +143,17 @@ export default function RandomPointManager() {
     await draw();
   }, [draw, loadingDraw]);
 
-  const handleCloseSelect = useCallback(() => setSelectOpen(false), []);
-  const handleCloseResult = useCallback(() => setResultOpen(false), []);
-
   return (
     <>
       <RandomPointSelectModal
         open={selectOpen}
-        onClose={handleCloseSelect}
+        onClose={() => setSelectOpen(false)}
         onConfirm={handleConfirm}
         timeText={timeText}
       />
-
       <RandomPointResultModal
         open={resultOpen}
-        onClose={handleCloseResult}
+        onClose={() => setResultOpen(false)}
         earnedPoint={earnedPoint}
         timeText={timeText}
       />

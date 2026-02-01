@@ -30,6 +30,14 @@ function hasValue(v) {
   return v != null && v !== '';
 }
 
+function normalizeImageSrc(src) {
+  if (!src || src === NO_DATA) return '';
+
+  if (src.includes('/public/')) return src.replace('/public/', '/');
+
+  return src;
+}
+
 /** GET /api/listings/:id 응답을 페이지 cardData 형식으로 변환. 값이 없으면 NO_DATA. */
 function listingToCardData(listing) {
   const pc = listing?.photoCard ?? {};
@@ -59,7 +67,7 @@ function listingToCardData(listing) {
     price: priceStr,
     remaining: qty != null ? qty : NO_DATA,
     outof: qty != null ? qty : NO_DATA,
-    imageSrc: hasValue(pc?.imageUrl) ? pc.imageUrl : NO_DATA,
+    imageSrc: hasValue(pc?.imageUrl) ? normalizeImageSrc(pc.imageUrl) : NO_DATA,
   };
 }
 
@@ -332,6 +340,11 @@ export default function MarketplaceCardPurchasePage() {
     setExchangeToCancel(null);
   };
 
+  const mainImageSrc =
+    cardData?.imageSrc && cardData.imageSrc !== NO_DATA
+      ? cardData.imageSrc
+      : '/assets/products/photo-card.svg';
+
   return (
     <div
       className={styles.pageContainer}
@@ -419,7 +432,7 @@ export default function MarketplaceCardPurchasePage() {
                 {/* Left Column - Photo Card Image */}
                 <div className={styles.leftColumn}>
                   <Image
-                    src={cardData.imageSrc || '/assets/products/photo-card.svg'}
+                    src={mainImageSrc}
                     alt={`${cardData.description} 포토카드`}
                     width={820}
                     height={620}
