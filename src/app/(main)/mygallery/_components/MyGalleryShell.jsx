@@ -35,7 +35,7 @@ export default function MyGalleryShell({ children }) {
               size="l"
               thickness="thick"
               className="w-[440px] h-[60px]"
-              onClick={() => router.push('/mygallery/create')}
+              onClick={() => router.push('/create-card')}
             >
               포토카드 생성하기
             </ButtonPrimary>

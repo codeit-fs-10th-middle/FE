@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 
 const TABS = [
   { href: '/mygallery', label: '보유 포토카드' },
-  { href: '/mygallery/selling', label: '판매 중인 포토카드' },
+  { href: '/mygallery/selling-card', label: '판매 중인 포토카드' },
   { href: '/create-card', label: '포토카드 생성' },
 ];
 
