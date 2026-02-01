@@ -22,16 +22,10 @@ const GRADE_OPTIONS = [
 ];
 
 const GENRE_OPTIONS = [
-  { label: '앨범', value: '앨범' },
-  { label: '특전', value: '특전' },
-  { label: '팬싸', value: '팬싸' },
-  { label: '시즌그리팅', value: '시즌그리팅' },
-  { label: '팬미팅', value: '팬미팅' },
-  { label: '콘서트', value: '콘서트' },
-  { label: 'MD', value: 'MD' },
-  { label: '콜라보', value: '콜라보' },
-  { label: '팬클럽', value: '팬클럽' },
-  { label: '기타', value: '기타' },
+  { label: '풍경', value: '풍경' },
+  { label: '음식', value: '음식' },
+  { label: '인물', value: '인물' },
+  { label: '동물', value: '동물' },
 ];
 
 const FIELD_TEXT =

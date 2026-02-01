@@ -156,7 +156,8 @@ export default function MyGallerySellingPage() {
         const cursorToUse = cursorOverride !== undefined ? cursorOverride : nextCursor;
         if (cursorToUse) qs.set('cursor', String(cursorToUse));
 
-        const url = `/api/listings?${qs.toString()}`;
+        if (!API_BASE_DIRECT) throw new Error('NEXT_PUBLIC_API_BASE_URL is missing');
+        const url = `${API_BASE_DIRECT}/listings?${qs.toString()}`;
         const res = await fetch(url, { credentials: 'include' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
@@ -175,7 +176,7 @@ export default function MyGallerySellingPage() {
         setLoading(false);
       }
     },
-    [meId, nextCursor, statusParam],
+    [API_BASE_DIRECT, meId, nextCursor, statusParam],
   );
 
   // ✅ 타이틀
