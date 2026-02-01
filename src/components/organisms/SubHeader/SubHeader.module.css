@@ -28,16 +28,15 @@
 .mobileSearchInput {
   width: 100%;
   box-sizing: border-box;
-  border:1px solid #ffffff;
+  border: 1px solid #ffffff;
 }
-
 
 .divider {
   display: block;
   width: 90%;
   height: 0;
   border: none;
-  border-top: 1px solid #5A5A5A;
+  border-top: 1px solid #5a5a5a;
   margin: 0 auto;
 }
 
@@ -95,7 +94,7 @@
 /* Mobile: yellow sell button in fixed bottom */
 @media (max-width: 499px) {
   .fixedBottom .sellBtnFixed :global(button) {
-    background-color: #FFFF00 !important;
+    background-color: #ffff00 !important;
     color: #000000 !important;
     border: none;
   }
@@ -106,7 +105,7 @@
   flex-shrink: 0;
 }
 .sellBtn {
-  background: #FFFF00;
+  background: #ffff00;
   width: 430px;
   max-width: 430px;
   box-sizing: border-box;
@@ -225,7 +224,6 @@
     min-width: 0;
   }
 }
-
 
 /* 데스크톱 검색입력: 500px 이상에서 60% */
 .desktopSearchWrap {

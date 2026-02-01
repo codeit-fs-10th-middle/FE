@@ -16,12 +16,7 @@ const STORAGE_SELL_SUCCESS = 'marketplace_sell_success_data';
 /** Exchange UI: set to true when 교환 희망 정보 is ready to show */
 const SHOW_EXCHANGE = false;
 
-export default function CardSellingForm({
-  cardData,
-  onBack,
-  onSuccess,
-  isInModal = false,
-}) {
+export default function CardSellingForm({ cardData, onBack, onSuccess, isInModal = false }) {
   /* =========================
      STATE
      ========================= */
@@ -104,11 +99,15 @@ export default function CardSellingForm({
       onSuccess?.(payload);
     } catch (err) {
       const status = err?.response?.status;
-      const msg = status === 401
-        ? '로그인이 필요합니다.'
-        : status === 409
-          ? '이미 판매게시판 카드입니다.'
-          : (err?.response?.data?.message ?? err?.response?.data?.data?.message ?? err?.message ?? '판매 등록에 실패했습니다.');
+      const msg =
+        status === 401
+          ? '로그인이 필요합니다.'
+          : status === 409
+            ? '이미 판매게시판 카드입니다.'
+            : (err?.response?.data?.message ??
+              err?.response?.data?.data?.message ??
+              err?.message ??
+              '판매 등록에 실패했습니다.');
       setSubmitError(msg);
     } finally {
       setIsSubmitting(false);
@@ -149,12 +148,7 @@ export default function CardSellingForm({
             onClick={handleCancel}
             aria-label="뒤로가기"
           >
-            <Image
-              src="/assets/icons/ic_back.svg"
-              alt="뒤로가기"
-              width={22}
-              height={22}
-            />
+            <Image src="/assets/icons/ic_back.svg" alt="뒤로가기" width={22} height={22} />
           </button>
 
           <h1 className={styles.headerTitle}>나의 포토카드 판매하기</h1>
@@ -257,13 +251,16 @@ export default function CardSellingForm({
           <div className={styles.buttonCol}>
             <ResponsiveButton
               onClick={handleSave}
-              disabled={isSubmitting || !String(price ?? '').trim() || Number(String(price ?? '').replace(/\D/g, '')) <= 0}
+              disabled={
+                isSubmitting ||
+                !String(price ?? '').trim() ||
+                Number(String(price ?? '').replace(/\D/g, '')) <= 0
+              }
             >
               {isSubmitting ? '등록 중...' : '판매하기'}
             </ResponsiveButton>
           </div>
         </div>
-
       </div>
     </div>
   );

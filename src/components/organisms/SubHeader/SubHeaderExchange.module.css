@@ -15,7 +15,7 @@
   width: 48px;
   height: 6px;
   border-radius: 50px;
-  background-color: #5A5A5A;
+  background-color: #5a5a5a;
   flex-shrink: 0;
 }
 
@@ -33,7 +33,7 @@
   font-weight: 400;
   font-style: normal;
   line-height: 100%;
-  color: #A4A4A4;
+  color: #a4a4a4;
   margin: 0;
   padding-bottom: 0;
 }
@@ -42,7 +42,7 @@
 .titleBox {
   width: 100%;
   margin-bottom: 16px;
-  border-bottom: 1px solid #5A5A5A;
+  border-bottom: 1px solid #5a5a5a;
   padding-bottom: 16px;
   padding: 0 20px 16px;
   box-sizing: border-box;

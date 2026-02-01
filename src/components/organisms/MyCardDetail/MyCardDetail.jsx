@@ -97,11 +97,15 @@ export default function MyCardDetail({
         <Label className={styles.infoLabel}>총 판매 수량</Label>
         <div className={styles.quantityRightGroup}>
           <div className={styles.quantityControl}>
-            <ResponsiveButton className={styles.iconButton} onClick={handleMinus} disabled={quantity <= 1 || isSingleCard}>
-              <Image 
-                src="/assets/icons/ic_minus.svg" 
-                alt="minus" 
-                width={20} 
+            <ResponsiveButton
+              className={styles.iconButton}
+              onClick={handleMinus}
+              disabled={quantity <= 1 || isSingleCard}
+            >
+              <Image
+                src="/assets/icons/ic_minus.svg"
+                alt="minus"
+                width={20}
                 height={20}
                 className={styles.icon}
               />

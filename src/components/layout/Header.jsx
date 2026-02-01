@@ -12,8 +12,6 @@ export default function Header({ onOpenAlarm }) {
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [dropdownStyle, setDropdownStyle] = useState({ top: 0, left: 0 });
   const [mounted, setMounted] = useState(false);
 
   // =====================
@@ -37,7 +35,6 @@ export default function Header({ onOpenAlarm }) {
   const [isAlarmOpen, setIsAlarmOpen] = useState(false);
   const alarmWrapRef = useRef(null);
 
-  // ✅ 임시 알림 데이터
   const mockAlarms = [
     { id: 1, message: '김머누님이 [RARE] 우리집 앞마당을 1장 구매했습니다.', timeText: '1시간 전' },
     {
@@ -60,14 +57,14 @@ export default function Header({ onOpenAlarm }) {
 
   useEffect(() => setMounted(true), []);
 
-  // ✅ 모바일 메뉴 위치(기존 유지)
+  // ✅ 모바일 메뉴 위치
   useEffect(() => {
     if (!mounted || !isMenuOpen || !menuTriggerRef.current) return;
     const rect = menuTriggerRef.current.getBoundingClientRect();
     setMenuStyle({ top: rect.bottom + 6, left: rect.left });
   }, [mounted, isMenuOpen]);
 
-  // ✅ 바깥 클릭 닫기 (portal이든 absolute든 동일)
+  // ✅ 유저 조회
   useEffect(() => {
     async function fetchUser() {
       try {
@@ -85,20 +82,18 @@ export default function Header({ onOpenAlarm }) {
   async function handleLogout() {
     try {
       await http.post('/users/logout');
+    } finally {
       setUser(null);
       router.replace('/');
       router.refresh();
-    } catch {
-      setUser(null);
-      router.replace('/');
-      router.refresh();
+      setIsMenuOpen(false);
+      setIsAlarmOpen(false);
+      setIsProfileOpen(false);
     }
-    setIsMenuOpen(false);
   }
 
   useEffect(() => {
     function handleClickOutside(e) {
-      // mobile menu close
       if (
         menuRef.current &&
         !menuRef.current.contains(e.target) &&
@@ -107,13 +102,9 @@ export default function Header({ onOpenAlarm }) {
       ) {
         setIsMenuOpen(false);
       }
-
-      // profile close
       if (profileWrapRef.current && !profileWrapRef.current.contains(e.target)) {
         setIsProfileOpen(false);
       }
-
-      // alarm close
       if (alarmWrapRef.current && !alarmWrapRef.current.contains(e.target)) {
         setIsAlarmOpen(false);
       }
@@ -131,10 +122,10 @@ export default function Header({ onOpenAlarm }) {
       <Container className="flex h-[72px] items-center justify-between">
         {/* ================= Desktop (>= 768px) ================= */}
         <div className="hidden min-[768px]:flex min-[768px]:w-full min-[768px]:items-center min-[768px]:justify-between">
-          {/* LOGO */}
           <Link href="/" className="no-underline">
             <Image src="/assets/logos/logo.svg" alt="최애의포토" width={140} height={28} priority />
           </Link>
+
           <div className="flex items-center gap-4 text-sm text-white/80">
             {authLoading ? (
               <span className="text-white/50">...</span>
@@ -144,6 +135,7 @@ export default function Header({ onOpenAlarm }) {
                   <span>{Number(points).toLocaleString()}</span>
                   <span>P</span>
                 </div>
+
                 <button
                   type="button"
                   onClick={onOpenAlarm}
@@ -152,9 +144,15 @@ export default function Header({ onOpenAlarm }) {
                 >
                   🔔
                 </button>
+
                 <span>{displayName}</span>
                 <span className="mx-1 h-4 w-px bg-white/20" />
-                <button type="button" onClick={handleLogout} className="text-white/50 hover:text-white">
+
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="text-white/50 hover:text-white"
+                >
                   로그아웃
                 </button>
               </>
@@ -169,7 +167,7 @@ export default function Header({ onOpenAlarm }) {
         {/* ================= Mobile (< 768px) ================= */}
         <div className="flex w-full min-[768px]:hidden items-center gap-2 px-2">
           <div className="relative flex min-w-0 flex-1 justify-start">
-            {userName && (
+            {user && (
               <button
                 ref={menuTriggerRef}
                 type="button"
@@ -181,7 +179,6 @@ export default function Header({ onOpenAlarm }) {
               </button>
             )}
 
-            {/* ✅ 모바일 햄버거 메뉴(기존 portal 유지) */}
             {mounted &&
               isMenuOpen &&
               createPortal(
@@ -221,14 +218,12 @@ export default function Header({ onOpenAlarm }) {
               )}
           </div>
 
-          {/* LOGO */}
           <Link href="/" className="flex flex-1 justify-center no-underline">
             <Image src="/assets/logos/logo.svg" alt="최애의포토" width={120} height={24} priority />
           </Link>
 
-          {/* 오른쪽 */}
           <div className="flex min-w-0 flex-1 justify-end">
-            {userName ? (
+            {user ? (
               <div ref={alarmWrapRef} className="relative">
                 <button
                   type="button"
@@ -261,7 +256,7 @@ export default function Header({ onOpenAlarm }) {
               </div>
             ) : (
               <Link
-                href="/login"
+                href="/auth/login"
                 className="rounded px-3 py-2 text-sm font-semibold text-white hover:bg-white/10"
               >
                 로그인

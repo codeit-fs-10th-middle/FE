@@ -64,7 +64,7 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  border-bottom: 1px solid #5A5A5A;
+  border-bottom: 1px solid #5a5a5a;
   padding-bottom: 12px;
 }
 
@@ -169,14 +169,14 @@
   border-radius: 4px;
   cursor: pointer;
   border: none;
-  background-color: #FFFF00;
+  background-color: #ffff00;
   color: #000000;
   transition: all 0.3s ease;
   font-family: 'Noto Sans KR', sans-serif;
 }
 
 .exchangeButton:hover {
-  background-color: #FFD700;
+  background-color: #ffd700;
   opacity: 0.9;
 }
 

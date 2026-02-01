@@ -38,7 +38,15 @@ function userCardRowToCard(row) {
   };
 }
 
-export default function CardSellingListModal({ open, onClose, modalTitle = '나의 포토카드 판매하기', onCardSelect, onSellCardSelect, mode = 'sell', sellerUserId }) {
+export default function CardSellingListModal({
+  open,
+  onClose,
+  modalTitle = '나의 포토카드 판매하기',
+  onCardSelect,
+  onSellCardSelect,
+  mode = 'sell',
+  sellerUserId,
+}) {
   const router = useRouter();
   const [search, setSearch] = useState('');
   const [grade, setGrade] = useState('all');
@@ -50,7 +58,7 @@ export default function CardSellingListModal({ open, onClose, modalTitle = '나�
   const [isExchangeModalOpen, setIsExchangeModalOpen] = useState(false);
   const [exchangeCardData, setExchangeCardData] = useState(null);
   const [isMobileOrTablet, setIsMobileOrTablet] = useState(() =>
-    typeof window !== 'undefined' ? window.innerWidth <= 1199 : false
+    typeof window !== 'undefined' ? window.innerWidth <= 1199 : false,
   );
   const [filters, setFilters] = useState({ rarity: 'all', genre: 'all', soldout: 'all' });
   const [showSellForm, setShowSellForm] = useState(false);
@@ -88,9 +96,10 @@ export default function CardSellingListModal({ open, onClose, modalTitle = '나�
       setSellingList(Array.isArray(data) ? data.map(userCardRowToCard) : []);
     } catch (err) {
       const status = err?.response?.status;
-      const message = status === 401
-        ? '로그인이 필요합니다.'
-        : (err?.response?.data?.message ?? err?.message ?? '보유 카드를 불러오지 못했습니다.');
+      const message =
+        status === 401
+          ? '로그인이 필요합니다.'
+          : (err?.response?.data?.message ?? err?.message ?? '보유 카드를 불러오지 못했습니다.');
       setSellingListError(message);
       setSellingList([]);
     } finally {
@@ -129,32 +138,184 @@ export default function CardSellingListModal({ open, onClose, modalTitle = '나�
   // API 미사용 시 폴백용 샘플 (sellerUserId 없을 때)
   const sampleCards = useMemo(
     () => [
-      { id: 1, rarity: 'RARE', category: '풍경', owner: '프로여행러', description: '스페인 여행', price: '4 P', quantity: 1, imageSrc: imageSources[1], title: '스페인 여행', maxQuantity: 3, initialQuantity: 1, grade: 'RARE', genre: '풍경', exchangeDescription: '' },
-      { id: 2, rarity: 'COMMON', category: '풍경', owner: '미쓰손', description: '우리집 앞마당', price: '4 P', quantity: 1, imageSrc: imageSources[0], title: '우리집 앞마당', maxQuantity: 3, initialQuantity: 1, grade: 'COMMON', genre: '풍경', exchangeDescription: '' },
-      { id: 3, rarity: 'SUPER RARE', category: '풍경', owner: '랍스타', description: 'How Far I\'ll Go', price: '4 P', quantity: 1, imageSrc: imageSources[2], title: 'How Far I\'ll Go', maxQuantity: 3, initialQuantity: 1, grade: 'SUPER RARE', genre: '풍경', exchangeDescription: '' },
-      { id: 4, rarity: 'COMMON', category: '풍경', owner: '미쓰손', description: '우리집 앞마당', price: '4 P', quantity: 1, imageSrc: imageSources[0], title: '우리집 앞마당', maxQuantity: 3, initialQuantity: 1, grade: 'COMMON', genre: '풍경', exchangeDescription: '' },
-      { id: 5, rarity: 'RARE', category: '풍경', owner: '프로여행러', description: '스페인 여행', price: '4 P', quantity: 1, imageSrc: imageSources[1], title: '스페인 여행', maxQuantity: 3, initialQuantity: 1, grade: 'RARE', genre: '풍경', exchangeDescription: '' },
-      { id: 6, rarity: 'LEGENDARY', category: '풍경', owner: '미쓰손', description: '우리집 앞마당', price: '4 P', quantity: 1, imageSrc: imageSources[0], title: '우리집 앞마당', maxQuantity: 3, initialQuantity: 1, grade: 'LEGENDARY', genre: '풍경', exchangeDescription: '' },
-      { id: 7, rarity: 'COMMON', category: '풍경', owner: '랍스타', description: 'How Far I\'ll Go', price: '4 P', quantity: 1, imageSrc: imageSources[2], title: 'How Far I\'ll Go', maxQuantity: 3, initialQuantity: 1, grade: 'COMMON', genre: '풍경', exchangeDescription: '' },
-      { id: 8, rarity: 'SUPER RARE', category: '풍경', owner: '프로여행러', description: '스페인 여행', price: '4 P', quantity: 1, imageSrc: imageSources[1], title: '스페인 여행', maxQuantity: 3, initialQuantity: 1, grade: 'SUPER RARE', genre: '풍경', exchangeDescription: '' },
-      { id: 9, rarity: 'RARE', category: '풍경', owner: '미쓰손', description: '우리집 앞마당', price: '4 P', quantity: 1, imageSrc: imageSources[0], title: '우리집 앞마당', maxQuantity: 3, initialQuantity: 1, grade: 'RARE', genre: '풍경', exchangeDescription: '' },
-      { id: 10, rarity: 'COMMON', category: '풍경', owner: '랍스타', description: 'How Far I\'ll Go', price: '4 P', quantity: 1, imageSrc: imageSources[2], title: 'How Far I\'ll Go', maxQuantity: 3, initialQuantity: 1, grade: 'COMMON', genre: '풍경', exchangeDescription: '' },
+      {
+        id: 1,
+        rarity: 'RARE',
+        category: '풍경',
+        owner: '프로여행러',
+        description: '스페인 여행',
+        price: '4 P',
+        quantity: 1,
+        imageSrc: imageSources[1],
+        title: '스페인 여행',
+        maxQuantity: 3,
+        initialQuantity: 1,
+        grade: 'RARE',
+        genre: '풍경',
+        exchangeDescription: '',
+      },
+      {
+        id: 2,
+        rarity: 'COMMON',
+        category: '풍경',
+        owner: '미쓰손',
+        description: '우리집 앞마당',
+        price: '4 P',
+        quantity: 1,
+        imageSrc: imageSources[0],
+        title: '우리집 앞마당',
+        maxQuantity: 3,
+        initialQuantity: 1,
+        grade: 'COMMON',
+        genre: '풍경',
+        exchangeDescription: '',
+      },
+      {
+        id: 3,
+        rarity: 'SUPER RARE',
+        category: '풍경',
+        owner: '랍스타',
+        description: "How Far I'll Go",
+        price: '4 P',
+        quantity: 1,
+        imageSrc: imageSources[2],
+        title: "How Far I'll Go",
+        maxQuantity: 3,
+        initialQuantity: 1,
+        grade: 'SUPER RARE',
+        genre: '풍경',
+        exchangeDescription: '',
+      },
+      {
+        id: 4,
+        rarity: 'COMMON',
+        category: '풍경',
+        owner: '미쓰손',
+        description: '우리집 앞마당',
+        price: '4 P',
+        quantity: 1,
+        imageSrc: imageSources[0],
+        title: '우리집 앞마당',
+        maxQuantity: 3,
+        initialQuantity: 1,
+        grade: 'COMMON',
+        genre: '풍경',
+        exchangeDescription: '',
+      },
+      {
+        id: 5,
+        rarity: 'RARE',
+        category: '풍경',
+        owner: '프로여행러',
+        description: '스페인 여행',
+        price: '4 P',
+        quantity: 1,
+        imageSrc: imageSources[1],
+        title: '스페인 여행',
+        maxQuantity: 3,
+        initialQuantity: 1,
+        grade: 'RARE',
+        genre: '풍경',
+        exchangeDescription: '',
+      },
+      {
+        id: 6,
+        rarity: 'LEGENDARY',
+        category: '풍경',
+        owner: '미쓰손',
+        description: '우리집 앞마당',
+        price: '4 P',
+        quantity: 1,
+        imageSrc: imageSources[0],
+        title: '우리집 앞마당',
+        maxQuantity: 3,
+        initialQuantity: 1,
+        grade: 'LEGENDARY',
+        genre: '풍경',
+        exchangeDescription: '',
+      },
+      {
+        id: 7,
+        rarity: 'COMMON',
+        category: '풍경',
+        owner: '랍스타',
+        description: "How Far I'll Go",
+        price: '4 P',
+        quantity: 1,
+        imageSrc: imageSources[2],
+        title: "How Far I'll Go",
+        maxQuantity: 3,
+        initialQuantity: 1,
+        grade: 'COMMON',
+        genre: '풍경',
+        exchangeDescription: '',
+      },
+      {
+        id: 8,
+        rarity: 'SUPER RARE',
+        category: '풍경',
+        owner: '프로여행러',
+        description: '스페인 여행',
+        price: '4 P',
+        quantity: 1,
+        imageSrc: imageSources[1],
+        title: '스페인 여행',
+        maxQuantity: 3,
+        initialQuantity: 1,
+        grade: 'SUPER RARE',
+        genre: '풍경',
+        exchangeDescription: '',
+      },
+      {
+        id: 9,
+        rarity: 'RARE',
+        category: '풍경',
+        owner: '미쓰손',
+        description: '우리집 앞마당',
+        price: '4 P',
+        quantity: 1,
+        imageSrc: imageSources[0],
+        title: '우리집 앞마당',
+        maxQuantity: 3,
+        initialQuantity: 1,
+        grade: 'RARE',
+        genre: '풍경',
+        exchangeDescription: '',
+      },
+      {
+        id: 10,
+        rarity: 'COMMON',
+        category: '풍경',
+        owner: '랍스타',
+        description: "How Far I'll Go",
+        price: '4 P',
+        quantity: 1,
+        imageSrc: imageSources[2],
+        title: "How Far I'll Go",
+        maxQuantity: 3,
+        initialQuantity: 1,
+        grade: 'COMMON',
+        genre: '풍경',
+        exchangeDescription: '',
+      },
     ],
-    []
+    [],
   );
 
-  const cardsFromApi = sellingList.length > 0 ? sellingList : (sellingListError ? [] : sampleCards);
+  const cardsFromApi = sellingList.length > 0 ? sellingList : sellingListError ? [] : sampleCards;
   const filteredCards = useMemo(() => {
     let list = cardsFromApi;
-    if (grade && grade !== 'all') list = list.filter((c) => c.grade === grade || c.rarity === grade);
-    if (genre && genre !== 'all') list = list.filter((c) => c.genre === genre || c.category === genre);
+    if (grade && grade !== 'all')
+      list = list.filter((c) => c.grade === grade || c.rarity === grade);
+    if (genre && genre !== 'all')
+      list = list.filter((c) => c.genre === genre || c.category === genre);
     if (search.trim()) {
       const q = search.trim().toLowerCase();
       list = list.filter(
         (c) =>
           (c.description || '').toLowerCase().includes(q) ||
           (c.title || '').toLowerCase().includes(q) ||
-          (c.name || '').toLowerCase().includes(q)
+          (c.name || '').toLowerCase().includes(q),
       );
     }
     return list;
@@ -200,10 +361,10 @@ export default function CardSellingListModal({ open, onClose, modalTitle = '나�
   };
 
   return (
-    <Modal 
-      open={open} 
-      onClose={onClose} 
-      size={isMobileOrTablet ? "bottomSheetFull" : "custom"}
+    <Modal
+      open={open}
+      onClose={onClose}
+      size={isMobileOrTablet ? 'bottomSheetFull' : 'custom'}
       showCloseButton={!isMobileOrTablet && !showSellForm}
     >
       <div className={styles.modalContainer}>
@@ -300,27 +461,28 @@ export default function CardSellingListModal({ open, onClose, modalTitle = '나�
 
             {/* MyCard Grid */}
             {!sellingListLoading && !sellingListError && (
-            <div className={styles.cardsGrid}>
-              {filteredCards.length === 0 ? (
-                <div className={styles.emptyState}>등록된 카드가 없습니다.</div>
-              ) : (
-              filteredCards.map((card) => (
-                <div key={card.id} className={styles.cardItem}>
-                  <MyCard
-                    rarity={card.rarity}
-                    category={card.category}
-                    owner={card.owner}
-                    description={card.description}
-                    price={card.price}
-                    quantity={card.quantity}
-                    imageSrc={card.imageSrc}
-                    imageWidth={isMobileOrTablet ? 170 : 400}
-                    imageHeight={isMobileOrTablet ? 150 : 400}
-                    onClick={() => handleCardClick(card)}
-                  />
-                </div>
-              )))}
-            </div>
+              <div className={styles.cardsGrid}>
+                {filteredCards.length === 0 ? (
+                  <div className={styles.emptyState}>등록된 카드가 없습니다.</div>
+                ) : (
+                  filteredCards.map((card) => (
+                    <div key={card.id} className={styles.cardItem}>
+                      <MyCard
+                        rarity={card.rarity}
+                        category={card.category}
+                        owner={card.owner}
+                        description={card.description}
+                        price={card.price}
+                        quantity={card.quantity}
+                        imageSrc={card.imageSrc}
+                        imageWidth={isMobileOrTablet ? 170 : 400}
+                        imageHeight={isMobileOrTablet ? 150 : 400}
+                        onClick={() => handleCardClick(card)}
+                      />
+                    </div>
+                  ))
+                )}
+              </div>
             )}
           </div>
         )}
@@ -353,7 +515,7 @@ export default function CardSellingListModal({ open, onClose, modalTitle = '나�
         size="custom"
         noBorder={true}
       >
-        <MarketplaceSellSuccessPage 
+        <MarketplaceSellSuccessPage
           onButtonClick={() => {
             // Close success modal, keep CardSellingListModal open
             setIsSellSuccessModalOpen(false);

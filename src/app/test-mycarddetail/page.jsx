@@ -50,8 +50,7 @@ export default function TestMyCardDetailPage() {
             fontSize: '16px',
             fontWeight: '600',
           }}
-        >
-        </h2>
+        ></h2>
         <MyCardDetail
           rarity="COMMON"
           category="풍경"
