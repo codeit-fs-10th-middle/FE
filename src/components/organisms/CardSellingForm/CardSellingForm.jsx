@@ -1,59 +1,122 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
+
 import MyCardDetail from '@/components/organisms/MyCardDetail/MyCardDetail';
 import DropDown from '@/components/atoms/DropDown/DropDown';
 import TextBox from '@/components/atoms/TextBox/TextBox';
 import { ResponsiveButton } from '@/components/atoms/Button';
+import { http } from '@/lib/http/client';
+
 import styles from './CardSellingForm.module.css';
 
 const STORAGE_SELL_SUCCESS = 'marketplace_sell_success_data';
 
+/** Exchange UI: set to true when 교환 희망 정보 is ready to show */
+const SHOW_EXCHANGE = false;
+
 export default function CardSellingForm({ cardData, onBack, onSuccess, isInModal = false }) {
+  /* =========================
+     STATE
+     ========================= */
+
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState('');
   const [grade, setGrade] = useState('COMMON');
   const [genre, setGenre] = useState('풍경');
   const [description, setDescription] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
 
-  const extractPrice = (priceStr) => {
-    if (!priceStr) return '';
-    const match = String(priceStr).match(/(\d+)/);
-    return match ? match[1] : '';
-  };
+  /* =========================
+     EFFECTS
+     ========================= */
 
   useEffect(() => {
-    if (cardData) {
-      setQuantity(cardData.initialQuantity ?? 1);
-      setPrice(extractPrice(cardData.price) ?? '');
-      setGrade(cardData.grade ?? 'COMMON');
-      setGenre(cardData.genre ?? '풍경');
-      setDescription(cardData.exchangeDescription ?? '');
-    }
+    if (!cardData) return;
+
+    setQuantity(cardData.initialQuantity ?? 1);
+    setPrice(extractPrice(cardData.price));
+    setGrade(cardData.grade ?? 'COMMON');
+    setGenre(cardData.genre ?? '풍경');
+    setDescription(cardData.exchangeDescription ?? '');
   }, [cardData]);
 
+  /* =========================
+     HANDLERS
+     ========================= */
+
   const handleCancel = () => {
-    if (onBack) {
-      onBack();
+    onBack?.();
+  };
+
+  const handleSave = async () => {
+    if (!cardData) return;
+
+    const userCardId = cardData.user_card_id ?? cardData.id;
+    if (!userCardId) {
+      setSubmitError('카드 정보를 찾을 수 없습니다.');
+      return;
+    }
+
+    const qty = Number(quantity);
+    if (!Number.isInteger(qty) || qty <= 0) {
+      setSubmitError('수량은 1 이상이어야 합니다.');
+      return;
+    }
+
+    const pricePerUnit = Number(price?.replace(/\D/g, '') ?? 0);
+    if (!Number.isFinite(pricePerUnit) || pricePerUnit <= 0) {
+      setSubmitError('가격을 입력해 주세요.');
+      return;
+    }
+
+    setSubmitError(null);
+    setIsSubmitting(true);
+    try {
+      const res = await http.post('/api/sell', {
+        userCardId: Number(userCardId),
+        quantity: qty,
+        pricePerUnit,
+        desired_grade: grade ?? null,
+        desired_genre: genre ?? null,
+        desired_desc: description?.trim() || null,
+      });
+      const serverData = res.data?.data ?? null;
+      const payload = {
+        ...cardData,
+        quantity: qty,
+        pricePerUnit,
+        listingId: serverData?.listingId,
+        ...(serverData || {}),
+      };
+      try {
+        sessionStorage.setItem(STORAGE_SELL_SUCCESS, JSON.stringify(payload));
+      } catch {
+        // storage is optional
+      }
+      onSuccess?.(payload);
+    } catch (err) {
+      const status = err?.response?.status;
+      const msg =
+        status === 401
+          ? '로그인이 필요합니다.'
+          : status === 409
+            ? '이미 판매게시판 카드입니다.'
+            : (err?.response?.data?.message ??
+              err?.response?.data?.data?.message ??
+              err?.message ??
+              '판매 등록에 실패했습니다.');
+      setSubmitError(msg);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleSave = () => {
-    if (!cardData) return;
-    const payload = {
-      ...cardData,
-      quantity,
-      rarity: grade,
-      title: cardData.title || cardData.description || '우리집 앞마당',
-    };
-    try {
-      sessionStorage.setItem(STORAGE_SELL_SUCCESS, JSON.stringify(payload));
-    } catch {}
-    if (onSuccess) {
-      onSuccess(payload);
-    }
-  };
+  /* =========================
+     OPTIONS
+     ========================= */
 
   const gradeOptions = [
     { value: 'COMMON', label: 'COMMON' },
@@ -69,30 +132,40 @@ export default function CardSellingForm({ cardData, onBack, onSuccess, isInModal
     { value: '동물', label: '동물' },
   ];
 
-  if (!cardData) {
-    return null;
-  }
+  if (!cardData) return null;
+
+  /* =========================
+     RENDER
+     ========================= */
 
   return (
     <div className={`${styles.formContainer} ${isInModal ? styles.inModal : ''}`}>
       {isInModal && (
-        <div className={styles.header}>
-          <button type="button" className={styles.backButton} onClick={handleCancel} aria-label="뒤로가기">
+        <header className={styles.header}>
+          <button
+            type="button"
+            className={styles.backButton}
+            onClick={handleCancel}
+            aria-label="뒤로가기"
+          >
             <Image src="/assets/icons/ic_back.svg" alt="뒤로가기" width={22} height={22} />
           </button>
+
           <h1 className={styles.headerTitle}>나의 포토카드 판매하기</h1>
-          <div className={styles.headerSpacer} aria-hidden />
-        </div>
+          <div className={styles.headerSpacer} />
+        </header>
       )}
 
       <div className={styles.content}>
+        {/* ===== Card Title ===== */}
         <div className={styles.cardTitleBox}>
-          <h2 className={styles.cardTitle}>{cardData.title || cardData.description || '우리집 앞마당'}</h2>
+          <h2 className={styles.cardTitle}>
+            {cardData.title || cardData.description || '우리집 앞마당'}
+          </h2>
         </div>
 
-        {/* Main Content Area - Two Column Layout */}
+        {/* ===== Main Content ===== */}
         <div className={styles.mainContentArea}>
-          {/* Left Column - Photo Section */}
           <div className={styles.leftColumn}>
             <div className={styles.photoSection}>
               <Image
@@ -105,7 +178,6 @@ export default function CardSellingForm({ cardData, onBack, onSuccess, isInModal
             </div>
           </div>
 
-          {/* Right Column - Details Section */}
           <div className={styles.rightColumn}>
             <div className={styles.detailsSection}>
               <MyCardDetail
@@ -122,66 +194,84 @@ export default function CardSellingForm({ cardData, onBack, onSuccess, isInModal
           </div>
         </div>
 
-        <div className={styles.cardTitleBox}>
-          <h2 className={styles.sectionTitle}>교환 희망 정보</h2>
-        </div>
+        {/* [EXCHANGE] 교환 희망 정보 — visible when SHOW_EXCHANGE is true */}
+        {SHOW_EXCHANGE && (
+          <>
+            <div className={styles.cardTitleBox}>
+              <h2 className={styles.sectionTitle}>교환 희망 정보</h2>
+            </div>
 
-        {/* Grade & Genre - same row on desktop */}
-        <div className={styles.filterRow}>
-          <div className={styles.gradeSection}>
-            <h3 className={styles.label}>등급</h3>
-            <DropDown
-              options={gradeOptions}
-              value={grade}
-              onChange={(e) => setGrade(e.target.value)}
-              wrapperStyle={{ border: '1px solid #ffffff' }}
-              style={{ border: '1px solid #ffffff' }}
-            />
-          </div>
+            <div className={styles.filterRow}>
+              <div className={styles.gradeSection}>
+                <h3 className={styles.label}>등급</h3>
+                <DropDown
+                  options={gradeOptions}
+                  value={grade}
+                  onChange={(e) => setGrade(e.target.value)}
+                />
+              </div>
 
-          <div className={styles.genreSection}>
-            <h3 className={styles.label}>장르</h3>
-            <DropDown
-              options={genreOptions}
-              value={genre}
-              onChange={(e) => setGenre(e.target.value)}
-              wrapperStyle={{ border: '1px solid #ffffff' }}
-              style={{ border: '1px solid #ffffff' }}
-            />
-          </div>
-        </div>
+              <div className={styles.genreSection}>
+                <h3 className={styles.label}>장르</h3>
+                <DropDown
+                  options={genreOptions}
+                  value={genre}
+                  onChange={(e) => setGenre(e.target.value)}
+                />
+              </div>
+            </div>
 
-        <div className={styles.descriptionSection}>
-          <h3 className={styles.label}>교환 희망 설명</h3>
-          <TextBox
-            label=""
-            value={description}
-            placeholder="--- ---"
-            onChange={setDescription}
-            wrapperStyle={{ width: '100%', gap: 0 }}
-            textareaStyle={{ width: '100%', minHeight: '120px' }}
-          />
-        </div>
+            <div className={styles.descriptionSection}>
+              <h3 className={styles.label}>교환 희망 설명</h3>
+              <TextBox
+                value={description}
+                placeholder="--- ---"
+                onChange={setDescription}
+                wrapperStyle={{ width: '100%' }}
+                textareaStyle={{ width: '100%', minHeight: '120px' }}
+              />
+            </div>
+          </>
+        )}
 
+        {submitError && (
+          <p className={styles.submitError} role="alert">
+            {submitError}
+          </p>
+        )}
+
+        {/* ===== Actions ===== */}
         <div className={styles.actionButtons}>
-          <ResponsiveButton
-            fullWidth={true}
-            onClick={handleCancel} 
-            className={styles.cancelButton}
-            style={{ display: 'flex', width: '100%' }}
-          >
-            취소하기
-          </ResponsiveButton>
-          <ResponsiveButton 
-            fullWidth={true}
-            onClick={handleSave} 
-            className={styles.saveButton}
-            style={{ display: 'flex', width: '100%' }}
-          >
-            판매하기
-          </ResponsiveButton>
+          <div className={styles.buttonCol}>
+            <ResponsiveButton onClick={handleCancel} disabled={isSubmitting}>
+              취소하기
+            </ResponsiveButton>
+          </div>
+
+          <div className={styles.buttonCol}>
+            <ResponsiveButton
+              onClick={handleSave}
+              disabled={
+                isSubmitting ||
+                !String(price ?? '').trim() ||
+                Number(String(price ?? '').replace(/\D/g, '')) <= 0
+              }
+            >
+              {isSubmitting ? '등록 중...' : '판매하기'}
+            </ResponsiveButton>
+          </div>
         </div>
       </div>
     </div>
   );
+}
+
+/* =========================
+   HELPERS
+   ========================= */
+
+function extractPrice(value) {
+  if (!value) return '';
+  const match = String(value).match(/\d+/);
+  return match ? match[0] : '';
 }

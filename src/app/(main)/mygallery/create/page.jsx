@@ -1,7 +1,7 @@
 import Container from '@/components/layout/Container';
-import CreateCardForm from './_components/CreateCardForm';
+import CreateCardForm from '../../create-card/_components/CreateCardForm';
 
-export default function CreateCardPage() {
+export default function MyGalleryCreatePage() {
   return (
     <Container>
       <section className="pt-[50px] max-w-[1400px]">

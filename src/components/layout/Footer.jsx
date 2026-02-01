@@ -62,9 +62,7 @@ export default function Footer() {
       </Label>
 
       {/* Call-to-Action Button */}
-      <ResponsiveButton href="/marketplace">
-        최애 찾으러 가기
-      </ResponsiveButton>
+      <ResponsiveButton href="/marketplace">최애 찾으러 가기</ResponsiveButton>
     </div>
   );
 }

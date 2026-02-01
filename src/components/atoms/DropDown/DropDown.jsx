@@ -4,13 +4,7 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from './DropDown.module.css';
 
-export default function DropDown({
-  options,
-  value,
-  onChange,
-  className,
-  wrapperStyle,
-}) {
+export default function DropDown({ options, value, onChange, className, wrapperStyle }) {
   const [isOpen, setIsOpen] = useState(false);
   const wrapperRef = useRef(null);
 
@@ -36,11 +30,7 @@ export default function DropDown({
   };
 
   return (
-    <div
-      ref={wrapperRef}
-      className={`${styles.wrapper} ${className || ''}`}
-      style={wrapperStyle}
-    >
+    <div ref={wrapperRef} className={`${styles.wrapper} ${className || ''}`} style={wrapperStyle}>
       {/* Trigger */}
       <button
         type="button"
@@ -49,9 +39,7 @@ export default function DropDown({
         aria-expanded={isOpen}
         onClick={() => setIsOpen((v) => !v)}
       >
-        <span className={styles.value}>
-          {selectedOption?.label ?? '선택'}
-        </span>
+        <span className={styles.value}>{selectedOption?.label ?? '선택'}</span>
         <span className={styles.icon}>
           <img
             src={isOpen ? '/assets/icons/ic_up.svg' : '/assets/icons/ic_down.svg'}
@@ -70,9 +58,7 @@ export default function DropDown({
               key={option.value}
               role="option"
               aria-selected={option.value === value}
-              className={`${styles.option} ${
-                option.value === value ? styles.selected : ''
-              }`}
+              className={`${styles.option} ${option.value === value ? styles.selected : ''}`}
               onClick={() => handleSelect(option)}
             >
               {option.label}

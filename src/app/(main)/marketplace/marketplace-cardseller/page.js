@@ -16,7 +16,8 @@ export default function MarketplaceCardSellerPage() {
     rarity: 'LEGENDARY',
     category: '풍경',
     owner: '미쓰손',
-    description: '우리집 앞마당 포토카드입니다. 우리집 앞마당 포토카드입니다. 우리집 앞마당 포토카드입니다.',
+    description:
+      '우리집 앞마당 포토카드입니다. 우리집 앞마당 포토카드입니다. 우리집 앞마당 포토카드입니다.',
     price: '4 P',
     remaining: 2,
     outof: 5,
@@ -43,7 +44,7 @@ export default function MarketplaceCardSellerPage() {
       imageSrc: '/assets/products/photo-card-two.svg',
     },
     {
-      title: 'How Far I\'ll Go',
+      title: "How Far I'll Go",
       rarity: 'SUPER RARE',
       category: '풍경',
       price: '4P',
@@ -52,7 +53,7 @@ export default function MarketplaceCardSellerPage() {
       imageSrc: '/assets/products/photo-card-another.svg',
     },
     {
-      title: 'How Far I\'ll Go',
+      title: "How Far I'll Go",
       rarity: 'SUPER RARE',
       category: '풍경',
       price: '4P',

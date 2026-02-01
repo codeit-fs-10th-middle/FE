@@ -34,91 +34,91 @@
   flex-direction: column;
   gap: 12px;
 }
-  
-  .title {
-    font-size: 20px;
-    font-weight: bold;
-    color: #ffffff;
-    line-height: 1.2;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  
-  .metadata {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-  }
-  
-  .metadataLeft {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  
-  .rarity {
-    font-size: 16px;
-    font-weight: bold;
-    color: #efff04;
-  }
-  
-  .separator {
-    color: #a4a4a4;
-    font-size: 16px;
-  }
-  
-  .category {
-    font-size: 16px;
-    font-weight: 400;
-    color: #a4a4a4;
-  }
-  
-  .owner {
-    font-size: 16px;
-    font-weight: 400;
-    color: #a4a4a4;
-    text-decoration: underline;
-  }
-  
-  .divider {
-    width: 100%;
-    height: 1px;
-    background-color: #a4a4a4;
-    margin: 4px 0;
-  }
-  
-  .infoSection {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .infoRow {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .infoLabel {
-    font-size: 16px;
-    font-weight: 400;
-    color: #ffffff;
-  }
-  
-  .infoValue {
-    font-size: 20px;
-    font-weight: bold;
-    color: #ffffff;
-  }
-  
-  .infoValue .outof {
-      color: #ffffff;
-      font-size: 16px;
-      font-weight: 200;
-  }
-  
+
+.title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #ffffff;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.metadata {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.metadataLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rarity {
+  font-size: 16px;
+  font-weight: bold;
+  color: #efff04;
+}
+
+.separator {
+  color: #a4a4a4;
+  font-size: 16px;
+}
+
+.category {
+  font-size: 16px;
+  font-weight: 400;
+  color: #a4a4a4;
+}
+
+.owner {
+  font-size: 16px;
+  font-weight: 400;
+  color: #a4a4a4;
+  text-decoration: underline;
+}
+
+.divider {
+  width: 100%;
+  height: 1px;
+  background-color: #a4a4a4;
+  margin: 4px 0;
+}
+
+.infoSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.infoLabel {
+  font-size: 16px;
+  font-weight: 400;
+  color: #ffffff;
+}
+
+.infoValue {
+  font-size: 20px;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.infoValue .outof {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 200;
+}
+
 .footer {
   display: flex;
   justify-content: center;
@@ -134,10 +134,10 @@
   color: #ffffff;
   text-align: center;
 }
-  
-  .logoAccent {
-    color: #efff04;
-  }
+
+.logoAccent {
+  color: #efff04;
+}
 
 /* 모바일(499px 이하): CardSellingListModal 내부 등 – 이미지 170x150, 폰트·패딩 축소 (CardOriginal 기준) */
 @media (max-width: 499px) {

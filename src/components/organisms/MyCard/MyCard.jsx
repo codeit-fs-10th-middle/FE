@@ -9,7 +9,7 @@ export default function MyCard({
   rarity = 'COMMON',
   category = '풍경',
   owner = '랍스타타',
-  description = 'How Far I\'ll Go',
+  description = "How Far I'll Go",
   price = '4 P',
   quantity = 1,
   imageSrc = '/assets/products/photo-card-mycard.svg',
@@ -18,7 +18,11 @@ export default function MyCard({
   onClick,
 }) {
   return (
-    <div className={styles.myCard} onClick={onClick} style={{ cursor: onClick ? 'pointer' : 'default' }}>
+    <div
+      className={styles.myCard}
+      onClick={onClick}
+      style={{ cursor: onClick ? 'pointer' : 'default' }}
+    >
       {/* Image Section */}
       <div className={styles.imageContainer}>
         <Image
@@ -57,7 +61,7 @@ export default function MyCard({
           <div className={styles.infoRow}>
             <Label className={styles.infoLabel}>수량</Label>
             <div className={styles.infoValue}>
-                <Label className={styles.quantity}>{quantity}</Label>
+              <Label className={styles.quantity}>{quantity}</Label>
             </div>
           </div>
         </div>
@@ -66,7 +70,13 @@ export default function MyCard({
       {/* Footer Logo */}
       <div className={styles.footer}>
         <span className={styles.logo}>
-          <Image src="/assets/logos/logo.svg" alt="Logo" width={100} height={100} className={styles.logo} />
+          <Image
+            src="/assets/logos/logo.svg"
+            alt="Logo"
+            width={100}
+            height={100}
+            className={styles.logo}
+          />
         </span>
       </div>
     </div>

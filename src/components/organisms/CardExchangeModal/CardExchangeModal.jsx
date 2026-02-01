@@ -7,7 +7,13 @@ import TextBox from '@/components/atoms/TextBox/TextBox';
 import { ButtonPrimary } from '@/components/atoms/Button';
 import styles from './CardExchangeModal.module.css';
 
-export default function CardExchangeModal({ open, onClose, targetCardData, exchangeCardData, onExchangeSuccess }) {
+export default function CardExchangeModal({
+  open,
+  onClose,
+  targetCardData,
+  exchangeCardData,
+  onExchangeSuccess,
+}) {
   const [exchangeMessage, setExchangeMessage] = useState('');
 
   const handleCancel = () => {
@@ -38,12 +44,7 @@ export default function CardExchangeModal({ open, onClose, targetCardData, excha
 
         {/* Tablet/Mobile: Top handle – click to close modal */}
         {onClose && (
-          <button
-            type="button"
-            className={styles.topHandle}
-            onClick={onClose}
-            aria-label="닫기"
-          >
+          <button type="button" className={styles.topHandle} onClick={onClose} aria-label="닫기">
             <span className={styles.handleBar} aria-hidden />
           </button>
         )}
@@ -65,7 +66,7 @@ export default function CardExchangeModal({ open, onClose, targetCardData, excha
                 paddingBottom: '20px',
               }}
             >
-              {targetCardData?.description || 'How Far I\'ll Go'}
+              {targetCardData?.description || "How Far I'll Go"}
             </h1>
           </div>
 
@@ -77,10 +78,12 @@ export default function CardExchangeModal({ open, onClose, targetCardData, excha
                 rarity={exchangeCardData?.rarity || 'SUPER RARE'}
                 category={exchangeCardData?.category || '풍경'}
                 owner={exchangeCardData?.owner || '랍스타'}
-                description={exchangeCardData?.description || 'How Far I\'ll Go'}
+                description={exchangeCardData?.description || "How Far I'll Go"}
                 price={exchangeCardData?.price || '4 P'}
                 quantity={exchangeCardData?.quantity || 2}
-                imageSrc={exchangeCardData?.imageSrc || '/assets/products/photo-card-tree-with-lake.svg'}
+                imageSrc={
+                  exchangeCardData?.imageSrc || '/assets/products/photo-card-tree-with-lake.svg'
+                }
                 imageWidth={302}
                 imageHeight={226}
               />
@@ -98,7 +101,7 @@ export default function CardExchangeModal({ open, onClose, targetCardData, excha
                 wrapperStyle={{ width: '100%', gap: 0 }}
                 textareaStyle={{ width: '342px', minHeight: '153px', height: '153px' }}
               />
-              
+
               {/* Action Buttons */}
               <div className={styles.actionButtons}>
                 <button type="button" onClick={handleCancel} className={styles.cancelButton}>
