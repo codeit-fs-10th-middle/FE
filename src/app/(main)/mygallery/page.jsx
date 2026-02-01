@@ -19,12 +19,10 @@ const DEFAULT_PAGE_SIZE = 15;
 function mapApiCardToUi(card) {
   return {
     id: card.id ?? card.photoCardId ?? card.photocardId,
-    // 기존 FE가 쓰는 키들
     description: card.description ?? card.desc ?? '',
     owner: card.owner ?? card.ownerName ?? card.userNickname ?? '',
     category: card.genre ?? card.category ?? 'ALL',
     rarity: card.grade ?? card.rarity ?? 'COMMON',
-    // CardOriginal에서 필요하면 추가
     name: card.name ?? card.title ?? '',
     imageUrl: card.imageUrl ?? card.image ?? '',
     minPrice: card.minPrice ?? card.price ?? 0,
@@ -36,17 +34,16 @@ export default function MyGalleryPage() {
   const bp = useBreakpoint();
   const isMobile = bp === 'sm';
 
-  const { setOwnedCount, setLabel } = useMyGalleryCount();
+  // ✅ setTitle 추가로 꺼내기 (2번 해결 포인트)
+  const { setOwnedCount, setLabel, setTitle } = useMyGalleryCount();
 
   const [search, setSearch] = useState('');
   const [grade, setGrade] = useState('ALL');
   const [genre, setGenre] = useState('ALL');
 
-  // 서버 페이지네이션 상태
   const [page, setPage] = useState(1);
   const [pageSize] = useState(DEFAULT_PAGE_SIZE);
 
-  // 서버 데이터
   const [items, setItems] = useState([]);
   const [counts, setCounts] = useState({
     total: 0,
@@ -68,12 +65,9 @@ export default function MyGalleryPage() {
       setLoading(true);
       setError('');
 
-      // ✅ BE 스펙: GET /api/photo-cards/users/:userId?page=&pageSize=
       const qs = new URLSearchParams({
         page: String(page),
         pageSize: String(pageSize),
-        // 서버가 필터를 지원하면 아래도 같이 보내면 됨
-        // search, grade, genre
       });
 
       const res = await fetch(`/api/photo-cards/users/${userId}?${qs.toString()}`, {
@@ -84,15 +78,12 @@ export default function MyGalleryPage() {
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
-
       if (!json?.ok) throw new Error(json?.error ?? 'API returned ok:false');
 
       const data = json.data ?? {};
       const apiItems = Array.isArray(data.items) ? data.items : [];
 
       setItems(apiItems.map(mapApiCardToUi));
-
-      // counts / pageInfo는 BE가 내려주는 값 그대로 사용
       setCounts(data.counts ?? { total: 0, common: 0, rare: 0, superRare: 0, legendary: 0 });
 
       const pi = data.pageInfo ?? {};
@@ -107,21 +98,21 @@ export default function MyGalleryPage() {
     }
   }, [page, pageSize, userId]);
 
-  // 최초 + page 변경 시 서버 재조회
   useEffect(() => {
     fetchMyCards();
   }, [fetchMyCards]);
 
-  // 상단 Shell 텍스트/카운트 반영 (서버 counts.total 기준)
+  // ✅ 2번 해결: 데스크탑 큰 타이틀을 "마이갤러리"로 고정
+  useEffect(() => {
+    setTitle?.('마이갤러리');
+  }, [setTitle]);
+
+  // (기존) 라벨/카운트
   useEffect(() => {
     setLabel?.('유디님이 보유한 포토카드');
     setOwnedCount(counts.total);
   }, [counts.total, setOwnedCount, setLabel]);
 
-  // ✅ 지금 서버는 search/grade/genre 필터를 받지 않으니
-  // 일단 프론트에서만 필터링(현재 페이지 items 내부)
-  // 나중에 서버가 필터 지원하면, 이 로직 제거하고
-  // fetch 파라미터로 넘기고 page=1로 재조회하면 됨.
   const filteredItems = useMemo(() => {
     return items.filter((c) => {
       const okSearch = search
@@ -133,7 +124,6 @@ export default function MyGalleryPage() {
     });
   }, [items, search, grade, genre]);
 
-  // 필터 바뀌면 1페이지로(서버 필터 붙이면 여기서 fetch도 같이)
   useEffect(() => {
     setPage(1);
   }, [search, grade, genre]);
