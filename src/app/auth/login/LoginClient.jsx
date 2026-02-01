@@ -92,7 +92,15 @@ export default function LoginClient() {
         >
           {/* 로고 */}
           <div className="flex justify-center mb-1">
-            <Image src="/assets/logos/logo.svg" alt="최애의포토" width={260} height={60} priority />
+            <Link href="/" className="cursor-pointer">
+              <Image
+                src="/assets/logos/logo.svg"
+                alt="최애의포토"
+                width={260}
+                height={60}
+                priority
+              />
+            </Link>
           </div>
 
           {/* 이메일 (컴포넌트 사용) */}
@@ -126,14 +134,15 @@ export default function LoginClient() {
             type="submit"
             disabled={loading}
             className="
-              h-[55px] w-full rounded-[2px]
-              border-2 border-[#efff04] bg-[#efff04]
-              text-[16px] font-bold text-black
-              flex items-center justify-center
-              hover:opacity-95
-              disabled:opacity-60 disabled:cursor-not-allowed
-              mt-2
-            "
+    h-[55px] w-full rounded-[2px]
+    border-2 border-[#efff04] bg-[#efff04]
+    text-[16px] font-bold text-black
+    flex items-center justify-center
+    cursor-pointer
+    hover:opacity-95
+    disabled:opacity-60 disabled:cursor-not-allowed
+    mt-2
+  "
           >
             {loading ? '로그인 중...' : '로그인'}
           </button>

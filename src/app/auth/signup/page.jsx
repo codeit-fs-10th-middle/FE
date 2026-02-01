@@ -85,8 +85,17 @@ export default function SignupPage() {
       <section className="relative z-10 grid min-h-screen place-items-center px-6 py-12">
         <div className="flex w-full max-w-[980px] flex-col items-stretch">
           {/* logo */}
-          <div className="mb-20 flex justify-center">
-            <Image src="/assets/logos/logo.svg" alt="최애의포토" width={260} height={60} priority />
+          <div className="flex justify-center mb-1">
+            <Link href="/" className="cursor-pointer">
+              <Image
+                src="/assets/logos/logo.svg"
+                alt="최애의포토"
+                width={260}
+                height={60}
+                priority
+                className="mb-[30px]"
+              />
+            </Link>
           </div>
 
           {/* form */}

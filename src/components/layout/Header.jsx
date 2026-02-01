@@ -249,12 +249,15 @@ export default function Header() {
                   )}
                 </div>
 
-                <button onClick={handleLogout} className="text-white/50 hover:text-white">
+                <button
+                  onClick={handleLogout}
+                  className="cursor-pointer text-white/50 hover:text-white"
+                >
                   로그아웃
                 </button>
               </>
             ) : (
-              <Link href="/auth/login" className="text-yellow-300 hover:underline">
+              <Link href="/auth/login" className="cursor-pointer text-yellow-300 hover:underline">
                 로그인
               </Link>
             )}

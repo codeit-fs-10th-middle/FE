@@ -108,7 +108,13 @@ export default function Home() {
         >
           <Container>
             <div className="mx-auto w-full max-w-[720px]">
-              <p className="text-[18px] font-semibold tracking-[-0.02em]">최애의포토</p>
+              <Image
+                src="/assets/logos/logo.svg"
+                alt="최애의포토 로고"
+                width={120}
+                height={32}
+                className="mx-auto"
+              />
 
               <h1 className={`mt-[18px] leading-[1.25] font-bold tracking-[-0.02em] ${HERO.title}`}>
                 구하기 어려웠던
