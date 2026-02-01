@@ -1,17 +1,23 @@
-import React from 'react';
 import Container from '@/components/layout/Container';
 import SuccessClient from './SuccessClient';
 
-export default function CreateCardSuccessPage({ searchParams }) {
-  const sp = React.use(searchParams); // ✅ unwrap
+const gradeLabelMap = {
+  common: 'COMMON',
+  rare: 'RARE',
+  epic: 'SUPER RARE',
+  legendary: 'LEGENDARY',
+};
 
-  const grade = sp?.grade ?? 'RARE';
-  const title = sp?.title ?? '유리진 엄마당';
+export default function CreateCardSuccessPage({ searchParams }) {
+  const grade = searchParams?.grade ?? 'rare';
+  const title = searchParams?.title ?? '제목 없음';
+
+  const gradeLabel = gradeLabelMap[grade] ?? grade;
 
   return (
     <main className="min-h-screen bg-black text-white relative">
       <Container className="min-h-screen grid place-items-center relative">
-        <SuccessClient grade={grade} title={title} />
+        <SuccessClient grade={gradeLabel} title={title} />
       </Container>
     </main>
   );
