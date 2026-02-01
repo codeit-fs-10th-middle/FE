@@ -313,6 +313,7 @@ export default function CreateCardForm() {
                 size="s"
                 thickness="thin"
                 className={FILE_BUTTON_CLASS}
+                style={{ color: '#efff04' }}
                 onClick={openFilePicker}
               >
                 파일 선택

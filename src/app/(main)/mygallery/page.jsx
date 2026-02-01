@@ -29,21 +29,6 @@ export default function MyGalleryPage() {
   const [genre, setGenre] = useState('ALL');
   const [page, setPage] = useState(1);
 
-  /* 등급별 개수 */
-  const gradeCounts = useMemo(() => {
-    return sampleCards.reduce(
-      (acc, card) => {
-        acc.total += 1;
-        if (card.rarity === 'COMMON') acc.common += 1;
-        if (card.rarity === 'RARE') acc.rare += 1;
-        if (card.rarity === 'SUPER RARE') acc.superRare += 1;
-        if (card.rarity === 'LEGENDARY') acc.legendary += 1;
-        return acc;
-      },
-      { total: 0, common: 0, rare: 0, superRare: 0, legendary: 0 },
-    );
-  }, [sampleCards]); // sampleCards가 상수면 사실상 고정
-
   /* 필터 */
   const filteredCards = useMemo(() => {
     return sampleCards.filter((c) => {
@@ -55,6 +40,21 @@ export default function MyGalleryPage() {
       return okSearch && okGrade && okGenre;
     });
   }, [search, grade, genre]);
+
+  /* 등급별 개수 */
+  const gradeCounts = useMemo(() => {
+    return filteredCards.reduce(
+      (acc, card) => {
+        acc.total += 1;
+        if (card.rarity === 'COMMON') acc.common += 1;
+        if (card.rarity === 'RARE') acc.rare += 1;
+        if (card.rarity === 'SUPER RARE') acc.superRare += 1;
+        if (card.rarity === 'LEGENDARY') acc.legendary += 1;
+        return acc;
+      },
+      { total: 0, common: 0, rare: 0, superRare: 0, legendary: 0 },
+    );
+  }, [filteredCards]);
 
   useEffect(() => {
     setLabel?.('유디님이 보유한 포토카드');
