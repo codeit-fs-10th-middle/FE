@@ -4,13 +4,15 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from './DropDown.module.css';
 
+const ICON_OPEN = '/assets/icons/ic_dropdown3.svg'; // 열림(▲)
+const ICON_CLOSED = '/assets/icons/ic_dropdown2.svg'; // 닫힘(▼)
+
 export default function DropDown({ options, value, onChange, className, wrapperStyle }) {
   const [isOpen, setIsOpen] = useState(false);
   const wrapperRef = useRef(null);
 
   const selectedOption = options.find((o) => o.value === value);
 
-  // close when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
@@ -23,15 +25,12 @@ export default function DropDown({ options, value, onChange, className, wrapperS
   }, []);
 
   const handleSelect = (option) => {
-    onChange({
-      target: { value: option.value },
-    });
+    onChange({ target: { value: option.value } });
     setIsOpen(false);
   };
 
   return (
     <div ref={wrapperRef} className={`${styles.wrapper} ${className || ''}`} style={wrapperStyle}>
-      {/* Trigger */}
       <button
         type="button"
         className={styles.trigger}
@@ -41,16 +40,10 @@ export default function DropDown({ options, value, onChange, className, wrapperS
       >
         <span className={styles.value}>{selectedOption?.label ?? '선택'}</span>
         <span className={styles.icon}>
-          <img
-            src={isOpen ? '/assets/icons/ic_up.svg' : '/assets/icons/ic_down.svg'}
-            alt=""
-            width={24}
-            height={24}
-          />
+          <img src={isOpen ? ICON_OPEN : ICON_CLOSED} alt="" width={24} height={24} />
         </span>
       </button>
 
-      {/* Menu */}
       {isOpen && (
         <ul className={styles.menu} role="listbox">
           {options.map((option) => (
