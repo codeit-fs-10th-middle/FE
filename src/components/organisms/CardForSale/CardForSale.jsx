@@ -6,14 +6,7 @@ import PhotoStatus from '../../atoms/PhotoStatus/PhotoStatus';
 // import logo from '../../../../public/assets/icons/logos/logo.svg';
 // import photoCardSoldout from '../../../../public/assets/products/photo-card-soldout.svg';
 
-export default function CardForSale({
-  rarity,
-  category,
-  owner,
-  description,
-  price,
-  remaining,
-}) {
+export default function CardForSale({ rarity, category, owner, description, price, remaining }) {
   return (
     <div className={styles.cardForSale}>
       {/* Image Section */}
@@ -55,7 +48,7 @@ export default function CardForSale({
           <div className={styles.infoRow}>
             <Label className={styles.infoLabel}>잔여</Label>
             <div className={styles.infoValue}>
-                <Label className={styles.remaining}>{remaining}</Label>
+              <Label className={styles.remaining}>{remaining}</Label>
             </div>
           </div>
         </div>
@@ -64,7 +57,13 @@ export default function CardForSale({
       {/* Footer Logo */}
       <div className={styles.footer}>
         <div className={styles.logo}>
-          <Image src="/assets/logos/logo.svg" alt="Logo" width={100} height={100} className={styles.logo} />
+          <Image
+            src="/assets/logos/logo.svg"
+            alt="Logo"
+            width={100}
+            height={100}
+            className={styles.logo}
+          />
         </div>
       </div>
     </div>

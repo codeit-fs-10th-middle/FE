@@ -55,11 +55,11 @@ export default function SubHeaderExchange({
           className={styles.filterIconBtn}
           aria-label="필터"
         >
-          <Image 
-            src="/assets/icons/ic_dropdown.svg" 
-            alt="필터" 
-            width={48} 
-            height={48} 
+          <Image
+            src="/assets/icons/ic_dropdown.svg"
+            alt="필터"
+            width={48}
+            height={48}
             className={styles.filterIcon}
           />
         </button>

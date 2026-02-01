@@ -18,7 +18,11 @@ export default function SubHeader({
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('lowPrice');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [internalFilters, setInternalFilters] = useState({ rarity: 'all', genre: 'all', soldout: 'all' });
+  const [internalFilters, setInternalFilters] = useState({
+    rarity: 'all',
+    genre: 'all',
+    soldout: 'all',
+  });
 
   const isControlled = controlledFilters != null;
   const filters = isControlled ? controlledFilters : internalFilters;
@@ -94,7 +98,14 @@ export default function SubHeader({
               </ResponsiveButton>
             </div>
           </div>
-          <div style={{ marginTop: '12px', marginBottom: '6px', width: '100%', borderTop: '2px solid #EEEEEE' }} />
+          <div
+            style={{
+              marginTop: '12px',
+              marginBottom: '6px',
+              width: '100%',
+              borderTop: '2px solid #EEEEEE',
+            }}
+          />
           <div className={`mt-5 ${styles.desktopFilterArea}`}>
             <div className={styles.desktopSearchWrap}>
               <InputSearch
@@ -160,11 +171,11 @@ export default function SubHeader({
             className={styles.filterIconBtn}
             aria-label="필터"
           >
-            <Image 
-              src="/assets/icons/ic_dropdown.svg" 
-              alt="필터" 
-              width={48} 
-              height={48} 
+            <Image
+              src="/assets/icons/ic_dropdown.svg"
+              alt="필터"
+              width={48}
+              height={48}
               className={styles.filterIcon}
             />
           </button>

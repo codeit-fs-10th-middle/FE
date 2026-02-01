@@ -37,7 +37,9 @@ function filterCards(cards, filters) {
   const { rarity, genre, soldout } = filters || {};
   return cards.filter((c) => {
     if (rarity && rarity !== 'all') {
-      const r = { common: 'COMMON', rare: 'RARE', superRare: 'SUPER RARE', legendary: 'LEGENDARY' }[rarity];
+      const r = { common: 'COMMON', rare: 'RARE', superRare: 'SUPER RARE', legendary: 'LEGENDARY' }[
+        rarity
+      ];
       if (r && c.rarity !== r) return false;
     }
     if (genre && genre !== 'all' && c.category !== genre) return false;
@@ -111,7 +113,10 @@ export default function MarketplacePage() {
 
   const cards = useMemo(() => listings, [listings]);
   const filteredCards = useMemo(() => filterCards(cards, filters), [cards, filters]);
-  const visibleCards = useMemo(() => filteredCards.slice(0, displayCount), [filteredCards, displayCount]);
+  const visibleCards = useMemo(
+    () => filteredCards.slice(0, displayCount),
+    [filteredCards, displayCount],
+  );
   const hasMore = displayCount < filteredCards.length || nextCursor != null;
 
   useEffect(() => {
@@ -134,7 +139,11 @@ export default function MarketplacePage() {
   useEffect(() => {
     const el = loadMoreRef.current;
     if (!el) return;
-    const obs = new IntersectionObserver(loadMore, { root: null, rootMargin: '200px', threshold: 0.1 });
+    const obs = new IntersectionObserver(loadMore, {
+      root: null,
+      rootMargin: '200px',
+      threshold: 0.1,
+    });
     obs.observe(el);
     return () => obs.disconnect();
   }, [loadMore]);
@@ -173,9 +182,7 @@ export default function MarketplacePage() {
                   imageSrc={card.imageSrc}
                   detailHref={card.remaining > 0 ? `/marketplace/${card.id}` : undefined}
                   onClick={
-                    card.remaining > 0
-                      ? () => router.push(`/marketplace/${card.id}`)
-                      : undefined
+                    card.remaining > 0 ? () => router.push(`/marketplace/${card.id}`) : undefined
                   }
                 />
               ))}
@@ -201,4 +208,3 @@ export default function MarketplacePage() {
     </div>
   );
 }
-

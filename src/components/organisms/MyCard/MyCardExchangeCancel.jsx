@@ -51,9 +51,7 @@ export default function MyCardExchangeCancel({
         <div className={styles.divider}></div>
 
         {/* Proposal Message */}
-        {proposalMessage && (
-          <div className={styles.proposalMessage}>{proposalMessage}</div>
-        )}
+        {proposalMessage && <div className={styles.proposalMessage}>{proposalMessage}</div>}
 
         {/* Cancel Button */}
         <ButtonPrimary onClick={onCancel} className={styles.cancelButton}>

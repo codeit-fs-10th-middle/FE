@@ -25,7 +25,7 @@
   font-weight: 400;
   font-style: normal;
   line-height: 100%;
-  color: #A4A4A4;
+  color: #a4a4a4;
   margin: 0;
 }
 
@@ -38,7 +38,7 @@
   width: 48px;
   height: 6px;
   border-radius: 50px;
-  background-color: #5A5A5A;
+  background-color: #5a5a5a;
   flex-shrink: 0;
 }
 
@@ -133,7 +133,7 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  border-bottom: 1px solid #D3D3D3;
+  border-bottom: 1px solid #d3d3d3;
   padding-bottom: 0;
 }
 
@@ -246,14 +246,14 @@
   border-radius: 4px;
   cursor: pointer;
   border: none;
-  background-color: #FFFF00;
+  background-color: #ffff00;
   color: #000000;
   transition: all 0.3s ease;
   font-family: 'Noto Sans KR', sans-serif;
 }
 
 .exchangeButton:hover {
-  background-color: #FFD700;
+  background-color: #ffd700;
   opacity: 0.9;
 }
 
@@ -302,7 +302,7 @@
     width: 100%;
     height: auto;
     padding: 0 0 12px;
-    border-bottom: 1px solid #5A5A5A;
+    border-bottom: 1px solid #5a5a5a;
   }
 
   .cardTitle {

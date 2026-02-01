@@ -98,7 +98,7 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  border-bottom: 1px solid #D3D3D3;
+  border-bottom: 1px solid #d3d3d3;
   padding-bottom: 0;
   margin-top: 0;
 }
@@ -172,7 +172,7 @@
   justify-content: space-between;
   align-items: flex-end;
   padding-bottom: 20px;
-  border-bottom: 1px solid #D3D3D3;
+  border-bottom: 1px solid #d3d3d3;
   overflow-x: hidden;
 }
 
@@ -235,7 +235,6 @@
   color: rgba(255, 255, 255, 0.6);
 }
 
-
 /* My Proposed Exchange List */
 .proposedExchangeTitleBox {
   width: 100%;
@@ -243,7 +242,7 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  border-bottom: 1px solid #D3D3D3;
+  border-bottom: 1px solid #d3d3d3;
   padding-bottom: 0;
 }
 
@@ -415,7 +414,7 @@
     width: 100%;
     height: auto;
     padding: 20px 20px 20px;
-    border-bottom: 1px solid #5A5A5A;
+    border-bottom: 1px solid #5a5a5a;
   }
 
   .cardTitle {
@@ -464,7 +463,7 @@
     flex-direction: column;
     align-items: flex-start;
     padding: 20px 20px 20px;
-    border-bottom: 1px solid #5A5A5A;
+    border-bottom: 1px solid #5a5a5a;
   }
 
   .exchangeTitle {

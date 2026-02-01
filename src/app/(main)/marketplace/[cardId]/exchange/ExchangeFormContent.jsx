@@ -42,7 +42,7 @@ export default function ExchangeFormContent({ cardData, onCancel, onExchange }) 
             paddingBottom: '20px',
           }}
         >
-          {cardData.description || 'How Far I\'ll Go'}
+          {cardData.description || "How Far I'll Go"}
         </h2>
       </div>
 
@@ -52,7 +52,7 @@ export default function ExchangeFormContent({ cardData, onCancel, onExchange }) 
             rarity={cardData.rarity || 'SUPER RARE'}
             category={cardData.category || '풍경'}
             owner={cardData.owner || '랍스타'}
-            description={cardData.description || 'How Far I\'ll Go'}
+            description={cardData.description || "How Far I'll Go"}
             price={cardData.price || '4 P'}
             quantity={cardData.quantity ?? 2}
             imageSrc={cardData.imageSrc || '/assets/products/photo-card-tree-with-lake.svg'}

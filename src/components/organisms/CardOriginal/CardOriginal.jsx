@@ -17,17 +17,15 @@ export default function CardOriginal({
   detailHref,
 }) {
   const imageNode = (
-    <Image
-      src={imageSrc}
-      alt="Photo Card"
-      width={400}
-      height={400}
-      className={styles.cardImage}
-    />
+    <Image src={imageSrc} alt="Photo Card" width={400} height={400} className={styles.cardImage} />
   );
 
   return (
-    <div className={styles.cardOriginal} onClick={onClick} style={{ cursor: onClick ? 'pointer' : 'default' }}>
+    <div
+      className={styles.cardOriginal}
+      onClick={onClick}
+      style={{ cursor: onClick ? 'pointer' : 'default' }}
+    >
       {/* Image Section - link to detail when detailHref provided */}
       <div className={styles.imageContainer}>
         {detailHref ? (
@@ -66,8 +64,8 @@ export default function CardOriginal({
           <div className={styles.infoRow}>
             <Label className={styles.infoLabel}>잔여</Label>
             <div className={styles.infoValue}>
-                <Label className={styles.remaining}>{remaining}</Label>
-                <Label className={styles.outof}> / {outof}</Label>
+              <Label className={styles.remaining}>{remaining}</Label>
+              <Label className={styles.outof}> / {outof}</Label>
             </div>
           </div>
         </div>
@@ -76,7 +74,13 @@ export default function CardOriginal({
       {/* Footer Logo */}
       <div className={styles.footer}>
         <span className={styles.logo}>
-          <Image src="/assets/logos/logo.svg" alt="Logo" width={100} height={100} className={styles.logo} />
+          <Image
+            src="/assets/logos/logo.svg"
+            alt="Logo"
+            width={100}
+            height={100}
+            className={styles.logo}
+          />
         </span>
       </div>
     </div>

@@ -6,7 +6,6 @@ import Modal from '@/components/atoms/Modal/Modal';
 import { ButtonPrimary, ButtonSecondary, ResponsiveButton } from '@/components/atoms/Button';
 import styles from './FilterBottomSheet.module.css';
 
-
 const GENRE_OPTIONS = [
   { value: 'all', label: '전체' },
   { value: '풍경', label: '풍경' },
@@ -77,7 +76,12 @@ export default function FilterBottomSheet({
   const genreCounts = useMemo(() => countByGenre(cards), [cards]);
   const soldCounts = useMemo(() => countSold(cards), [cards]);
 
-  const rarityToCard = { common: 'COMMON', rare: 'RARE', superRare: 'SUPER RARE', legendary: 'LEGENDARY' };
+  const rarityToCard = {
+    common: 'COMMON',
+    rare: 'RARE',
+    superRare: 'SUPER RARE',
+    legendary: 'LEGENDARY',
+  };
   const filteredCount = useMemo(() => {
     return cards.filter((c) => {
       if (rarity !== 'all') {
@@ -166,7 +170,9 @@ export default function FilterBottomSheet({
               >
                 <span
                   className={styles.optionLabel}
-                  style={{ color: opt.value === 'all' ? '#fff' : (RARITY_COLORS[opt.label] || '#fff') }}
+                  style={{
+                    color: opt.value === 'all' ? '#fff' : RARITY_COLORS[opt.label] || '#fff',
+                  }}
                 >
                   {opt.label}
                 </span>
@@ -200,7 +206,12 @@ export default function FilterBottomSheet({
         </div>
 
         <div className={styles.footer}>
-          <button type="button" className={styles.refreshBtn} onClick={handleReset} aria-label="초기화">
+          <button
+            type="button"
+            className={styles.refreshBtn}
+            onClick={handleReset}
+            aria-label="초기화"
+          >
             <Image src="/assets/icons/ic_refresh.svg" alt="초기화" width={24} height={24} />
           </button>
           <ResponsiveButton onClick={handleApply} className={styles.applyBtn}>
