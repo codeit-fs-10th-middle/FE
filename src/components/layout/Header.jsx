@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -8,68 +8,78 @@ import { useRouter } from 'next/navigation';
 import Container from '@/components/layout/Container';
 import { http } from '@/lib/http/client';
 
-export default function Header({ onOpenAlarm }) {
+import AlarmDropdownContent from './_components/AlarmDropdownContent';
+import ProfileDropdownContent from './_components/ProfileDropdownContent';
+
+/* ======================
+   utils
+====================== */
+function formatTimeAgo(input) {
+  const d = new Date(input);
+  if (Number.isNaN(d.getTime())) return '';
+  const diff = Date.now() - d.getTime();
+  const sec = Math.floor(diff / 1000);
+  if (sec < 60) return '방금 전';
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min}분 전`;
+  const hour = Math.floor(min / 60);
+  if (hour < 24) return `${hour}시간 전`;
+  const day = Math.floor(hour / 24);
+  return `${day}일 전`;
+}
+
+export default function Header() {
   const router = useRouter();
+
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
 
-  // =====================
-  // mobile 햄버거 메뉴 (portal 유지)
-  // =====================
+  /* ======================
+     mobile menu
+  ====================== */
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [menuStyle, setMenuStyle] = useState({ top: 0, left: 0 });
   const menuRef = useRef(null);
   const menuTriggerRef = useRef(null);
 
-  // =====================
-  // profile dropdown (absolute)
-  // =====================
+  /* ======================
+     profile dropdown
+  ====================== */
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileWrapRef = useRef(null);
 
-  // =====================
-  // alarm dropdown (absolute)
-  // =====================
-  const [isAlarmOn] = useState(true); // 임시: 알림 있음
+  /* ======================
+     alarm dropdown
+  ====================== */
   const [isAlarmOpen, setIsAlarmOpen] = useState(false);
-  const alarmWrapRef = useRef(null);
+  const alarmWrapRefDesktop = useRef(null);
+  const alarmWrapRefMobile = useRef(null);
 
-  const mockAlarms = [
-    { id: 1, message: '김머누님이 [RARE] 우리집 앞마당을 1장 구매했습니다.', timeText: '1시간 전' },
-    {
-      id: 2,
-      message: '예진쓰님이 [COMMON] 스페인 여행의 포토 카드 교환을 제안했습니다.',
-      timeText: '1시간 전',
-    },
-    { id: 3, message: '[LEGENDARY] 우리집 앞마당이 품절되었습니다.', timeText: '1시간 전' },
-    {
-      id: 4,
-      message: '[RARE] How Far I’ll Go 3장을 성공적으로 구매했습니다.',
-      timeText: '1시간 전',
-    },
-    {
-      id: 5,
-      message: '예진쓰님과의 [COMMON] 스페인 여행의 포토카드 교환이 성사되었습니다.',
-      timeText: '1시간 전',
-    },
-  ];
+  // ✅ 알림 상태
+  const [alarms, setAlarms] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [alarmLoading, setAlarmLoading] = useState(false);
 
   useEffect(() => setMounted(true), []);
 
-  // ✅ 모바일 메뉴 위치
+  /* ======================
+     mobile menu position
+  ====================== */
   useEffect(() => {
     if (!mounted || !isMenuOpen || !menuTriggerRef.current) return;
     const rect = menuTriggerRef.current.getBoundingClientRect();
     setMenuStyle({ top: rect.bottom + 6, left: rect.left });
   }, [mounted, isMenuOpen]);
 
-  // ✅ 유저 조회
+  /* ======================
+     user fetch
+  ====================== */
   useEffect(() => {
     async function fetchUser() {
       try {
         const { data } = await http.get('/users/me');
-        setUser(data.user ?? null);
+        setUser(data?.user ?? null);
       } catch {
         setUser(null);
       } finally {
@@ -79,19 +89,64 @@ export default function Header({ onOpenAlarm }) {
     fetchUser();
   }, []);
 
+  /* ======================
+     notifications fetch
+  ====================== */
+  const fetchNotifications = useCallback(async () => {
+    if (!user || alarmLoading) return;
+
+    setAlarmLoading(true);
+    try {
+      const { data } = await http.get('/notifications?limit=20');
+      if (!data?.ok) throw new Error('notifications ok:false');
+
+      const items = Array.isArray(data?.data?.items) ? data.data.items : [];
+
+      setAlarms(
+        items.map((n) => ({
+          id: n.id,
+          message: n.message,
+          timeText: n.createdAt ? formatTimeAgo(n.createdAt) : '',
+          isRead: Boolean(n.isRead),
+        })),
+      );
+
+      setUnreadCount(Number(data?.data?.unreadCount) || 0);
+    } catch {
+      setAlarms([]);
+      setUnreadCount(0);
+    } finally {
+      setAlarmLoading(false);
+    }
+  }, [user, alarmLoading]);
+
+  const handleToggleAlarm = async () => {
+    setIsAlarmOpen((v) => !v);
+    setIsProfileOpen(false);
+    await fetchNotifications();
+  };
+
+  /* ======================
+     logout
+  ====================== */
   async function handleLogout() {
     try {
       await http.post('/users/logout');
     } finally {
       setUser(null);
-      router.replace('/');
-      router.refresh();
+      setAlarms([]);
+      setUnreadCount(0);
       setIsMenuOpen(false);
       setIsAlarmOpen(false);
       setIsProfileOpen(false);
+      router.replace('/');
+      router.refresh();
     }
   }
 
+  /* ======================
+     outside click
+  ====================== */
   useEffect(() => {
     function handleClickOutside(e) {
       if (
@@ -102,10 +157,16 @@ export default function Header({ onOpenAlarm }) {
       ) {
         setIsMenuOpen(false);
       }
+
       if (profileWrapRef.current && !profileWrapRef.current.contains(e.target)) {
         setIsProfileOpen(false);
       }
-      if (alarmWrapRef.current && !alarmWrapRef.current.contains(e.target)) {
+
+      const inDesktop =
+        alarmWrapRefDesktop.current && alarmWrapRefDesktop.current.contains(e.target);
+      const inMobile = alarmWrapRefMobile.current && alarmWrapRefMobile.current.contains(e.target);
+
+      if (!inDesktop && !inMobile) {
         setIsAlarmOpen(false);
       }
     }
@@ -117,11 +178,14 @@ export default function Header({ onOpenAlarm }) {
   const displayName = user?.nickname ?? user?.email ?? '';
   const points = user?.points ?? 0;
 
+  const isAlarmOn = unreadCount > 0;
+  const alarmIconSrc = isAlarmOn ? '/assets/icons/ic_alarm_on.svg' : '/assets/icons/ic_alarm.svg';
+
   return (
-    <header className="w-full bg-black">
+    <header className="sticky top-0 z-50 w-full bg-black">
       <Container className="flex h-[72px] items-center justify-between">
-        {/* ================= Desktop (>= 768px) ================= */}
-        <div className="hidden min-[768px]:flex min-[768px]:w-full min-[768px]:items-center min-[768px]:justify-between">
+        {/* ================= Desktop ================= */}
+        <div className="hidden min-[768px]:flex w-full items-center justify-between">
           <Link href="/" className="no-underline">
             <Image src="/assets/logos/logo.svg" alt="최애의포토" width={140} height={28} priority />
           </Link>
@@ -136,131 +200,104 @@ export default function Header({ onOpenAlarm }) {
                   <span>P</span>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={onOpenAlarm}
-                  className="rounded p-2 text-white/70 hover:bg-white/10 hover:text-white"
-                  aria-label="알림"
-                >
-                  🔔
-                </button>
+                {/* Alarm */}
+                <div ref={alarmWrapRefDesktop} className="relative">
+                  <button
+                    type="button"
+                    onClick={handleToggleAlarm}
+                    className="relative rounded p-2 text-white/70 hover:bg-white/10"
+                    aria-label="알림"
+                  >
+                    <Image src={alarmIconSrc} alt="알림" width={24} height={24} />
+                    {unreadCount > 0 && (
+                      <span className="absolute right-[6px] top-[6px] h-[6px] w-[6px] rounded-full bg-red-500" />
+                    )}
+                  </button>
 
-                <span>{displayName}</span>
-                <span className="mx-1 h-4 w-px bg-white/20" />
+                  {isAlarmOpen && (
+                    <div className="absolute right-0 top-[calc(100%+10px)] z-[9999] rounded-[12px] overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.45)]">
+                      <AlarmDropdownContent items={alarms} loading={alarmLoading} />
+                    </div>
+                  )}
+                </div>
+
+                {/* Profile */}
+                <div ref={profileWrapRef} className="relative">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsProfileOpen((v) => !v);
+                      setIsAlarmOpen(false);
+                    }}
+                    className="rounded px-2 py-2 text-white/80 hover:bg-white/10"
+                  >
+                    {displayName}
+                  </button>
+
+                  {isProfileOpen && (
+                    <div className="absolute right-0 top-[calc(100%+10px)] z-[9999] rounded-[12px] overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.45)]">
+                      <ProfileDropdownContent
+                        userName={displayName}
+                        ownedPoint={Number(points) || 0}
+                        onLogout={handleLogout}
+                        onNavigate={(href) => {
+                          setIsProfileOpen(false);
+                          router.push(href);
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
 
                 <button
-                  type="button"
                   onClick={handleLogout}
-                  className="text-white/50 hover:text-white"
+                  className="cursor-pointer text-white/50 hover:text-white"
                 >
                   로그아웃
                 </button>
               </>
             ) : (
-              <Link href="/auth/login" className="text-yellow-300 hover:underline">
+              <Link href="/auth/login" className="cursor-pointer text-yellow-300 hover:underline">
                 로그인
               </Link>
             )}
           </div>
         </div>
 
-        {/* ================= Mobile (< 768px) ================= */}
+        {/* ================= Mobile ================= */}
         <div className="flex w-full min-[768px]:hidden items-center gap-2 px-2">
-          <div className="relative flex min-w-0 flex-1 justify-start">
+          <div className="flex flex-1 justify-start">
             {user && (
               <button
                 ref={menuTriggerRef}
-                type="button"
                 onClick={() => setIsMenuOpen((v) => !v)}
-                className="rounded p-2 text-white/70 hover:bg-white/10 hover:text-white"
-                aria-label="메뉴"
+                className="rounded p-2 text-white/70 hover:bg-white/10"
               >
                 <Image src="/assets/icons/ic_menu.svg" alt="" width={24} height={24} />
               </button>
             )}
-
-            {mounted &&
-              isMenuOpen &&
-              createPortal(
-                <div
-                  ref={menuRef}
-                  className="fixed z-[9999] min-w-[160px] rounded border border-white/20 bg-[#1a1a1a] py-2 shadow-lg"
-                  style={{ top: menuStyle.top, left: menuStyle.left }}
-                  role="menu"
-                >
-                  {user ? (
-                    <>
-                      <div className="flex items-center gap-1 px-4 py-2 text-sm text-white/80">
-                        <span>{Number(points).toLocaleString()}</span>
-                        <span>P</span>
-                      </div>
-                      <div className="my-1 h-px w-full bg-white/20" />
-                      <div className="px-4 py-2 text-sm text-white">{displayName}</div>
-                      <button
-                        type="button"
-                        onClick={handleLogout}
-                        className="w-full px-4 py-2 text-left text-sm text-white/50 hover:bg-white/10 hover:text-white"
-                      >
-                        로그아웃
-                      </button>
-                    </>
-                  ) : (
-                    <Link
-                      href="/auth/login"
-                      className="block px-4 py-2 text-sm text-yellow-300 hover:bg-white/10 hover:underline"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      로그인
-                    </Link>
-                  )}
-                </div>,
-                document.body,
-              )}
           </div>
 
-          <Link href="/" className="flex flex-1 justify-center no-underline">
-            <Image src="/assets/logos/logo.svg" alt="최애의포토" width={120} height={24} priority />
+          <Link href="/" className="flex flex-1 justify-center">
+            <Image src="/assets/logos/logo.svg" alt="최애의포토" width={120} height={24} />
           </Link>
 
-          <div className="flex min-w-0 flex-1 justify-end">
-            {user ? (
-              <div ref={alarmWrapRef} className="relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsAlarmOpen((v) => !v);
-                    setIsProfileOpen(false);
-                  }}
-                  className="relative rounded p-2 hover:bg-white/10"
-                  aria-label="알림"
-                >
-                  <Image
-                    src={isAlarmOn ? '/assets/icons/ic_alarm_on.svg' : '/assets/icons/ic_alarm.svg'}
-                    alt=""
-                    width={24}
-                    height={24}
-                  />
-                  {isAlarmOn && (
-                    <span className="absolute right-[9px] top-[9px] h-[6px] w-[6px] rounded-full bg-red-500" />
+          <div className="flex flex-1 justify-end">
+            {user && (
+              <div ref={alarmWrapRefMobile} className="relative">
+                <button onClick={handleToggleAlarm} className="relative p-2">
+                  <Image src={alarmIconSrc} alt="알림" width={24} height={24} />
+                  {unreadCount > 0 && (
+                    <span className="absolute right-[6px] top-[6px] h-[6px] w-[6px] rounded-full bg-red-500" />
                   )}
                 </button>
 
                 {isAlarmOpen && (
-                  <div
-                    className="absolute right-0 top-[calc(100%+10px)] z-[9999] h-[535px] w-[300px] overflow-hidden rounded bg-[#2b2b2b] shadow-[0_10px_30px_rgba(0,0,0,0.45)]"
-                    role="menu"
-                  >
-                    <AlarmDropdownContent items={mockAlarms} />
+                  <div className="absolute right-0 top-[calc(100%+10px)] z-[9999] rounded-[12px] overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.45)]">
+                    <AlarmDropdownContent items={alarms} loading={alarmLoading} />
                   </div>
                 )}
               </div>
-            ) : (
-              <Link
-                href="/auth/login"
-                className="rounded px-3 py-2 text-sm font-semibold text-white hover:bg-white/10"
-              >
-                로그인
-              </Link>
             )}
           </div>
         </div>

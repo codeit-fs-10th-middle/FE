@@ -13,21 +13,24 @@ import { useMyGalleryCount } from './_components/MyGalleryCountContext';
 
 import styles from './page.module.css';
 
-const DEFAULT_PAGE_SIZE = 15;
+const PAGE_SIZE = 15;
 
-// BE -> FE 카드 필드 매핑 (필드명 확정되면 여기만 수정)
-function mapApiCardToUi(card) {
+// ✅ NEXT_PUBLIC_API_BASE_URL만 사용 (뒤 슬래시 제거)
+const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || '').replace(/\/$/, '');
+
+/** BE → FE 카드 매핑 */
+function mapMyCardToCard(item) {
+  const pc = item?.photoCard ?? item;
+
   return {
-    id: card.id ?? card.photoCardId ?? card.photocardId,
-    // 기존 FE가 쓰는 키들
-    description: card.description ?? card.desc ?? '',
-    owner: card.owner ?? card.ownerName ?? card.userNickname ?? '',
-    category: card.genre ?? card.category ?? 'ALL',
-    rarity: card.grade ?? card.rarity ?? 'COMMON',
-    // CardOriginal에서 필요하면 추가
-    name: card.name ?? card.title ?? '',
-    imageUrl: card.imageUrl ?? card.image ?? '',
-    minPrice: card.minPrice ?? card.price ?? 0,
+    id: pc?.id ?? item?.cardId ?? item?.id,
+    description: pc?.description ?? '',
+    owner: pc?.ownerNickname ?? pc?.ownerName ?? '',
+    category: pc?.genre ?? pc?.category ?? 'ALL',
+    rarity: pc?.grade ?? pc?.rarity ?? 'COMMON',
+    name: pc?.name ?? '',
+    imageUrl: pc?.imageUrl ?? pc?.image ?? '',
+    minPrice: pc?.minPrice ?? 0,
   };
 }
 
@@ -36,92 +39,65 @@ export default function MyGalleryPage() {
   const bp = useBreakpoint();
   const isMobile = bp === 'sm';
 
-  const { setOwnedCount, setLabel } = useMyGalleryCount();
+  const { setOwnedCount, setTitle } = useMyGalleryCount();
 
   const [search, setSearch] = useState('');
   const [grade, setGrade] = useState('ALL');
   const [genre, setGenre] = useState('ALL');
 
-  // 서버 페이지네이션 상태
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(DEFAULT_PAGE_SIZE);
 
-  // 서버 데이터
   const [items, setItems] = useState([]);
-  const [counts, setCounts] = useState({
-    total: 0,
-    common: 0,
-    rare: 0,
-    superRare: 0,
-    legendary: 0,
-  });
-  const [totalPages, setTotalPages] = useState(1);
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // TODO: 로그인 연동되면 여기서 userId 가져오도록 교체
-  const userId = 1;
-
+  /** ✅ 내 카드 목록 */
   const fetchMyCards = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
 
-      // ✅ BE 스펙: GET /api/photo-cards/users/:userId?page=&pageSize=
-      const qs = new URLSearchParams({
-        page: String(page),
-        pageSize: String(pageSize),
-        // 서버가 필터를 지원하면 아래도 같이 보내면 됨
-        // search, grade, genre
-      });
+      if (!API_BASE) throw new Error('NEXT_PUBLIC_API_BASE_URL is missing');
 
-      const res = await fetch(`/api/photo-cards/users/${userId}?${qs.toString()}`, {
+      const res = await fetch(`${API_BASE}/users/me/cards`, {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
       });
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
       const json = await res.json();
 
-      if (!json?.ok) throw new Error(json?.error ?? 'API returned ok:false');
+      const rawItems = Array.isArray(json?.data?.items)
+        ? json.data.items
+        : Array.isArray(json?.items)
+          ? json.items
+          : Array.isArray(json?.data)
+            ? json.data
+            : [];
 
-      const data = json.data ?? {};
-      const apiItems = Array.isArray(data.items) ? data.items : [];
+      const mapped = rawItems.map(mapMyCardToCard);
 
-      setItems(apiItems.map(mapApiCardToUi));
-
-      // counts / pageInfo는 BE가 내려주는 값 그대로 사용
-      setCounts(data.counts ?? { total: 0, common: 0, rare: 0, superRare: 0, legendary: 0 });
-
-      const pi = data.pageInfo ?? {};
-      setTotalPages(Number(pi.totalPages ?? 1) || 1);
+      setItems(mapped);
+      setOwnedCount(mapped.length);
     } catch (e) {
       setError(e?.message ?? 'failed to load');
       setItems([]);
-      setCounts({ total: 0, common: 0, rare: 0, superRare: 0, legendary: 0 });
-      setTotalPages(1);
+      setOwnedCount(0);
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, userId]);
+  }, [setOwnedCount]);
 
-  // 최초 + page 변경 시 서버 재조회
   useEffect(() => {
     fetchMyCards();
   }, [fetchMyCards]);
 
-  // 상단 Shell 텍스트/카운트 반영 (서버 counts.total 기준)
+  // 타이틀 고정
   useEffect(() => {
-    setLabel?.('유디님이 보유한 포토카드');
-    setOwnedCount(counts.total);
-  }, [counts.total, setOwnedCount, setLabel]);
+    setTitle?.('마이갤러리');
+  }, [setTitle]);
 
-  // ✅ 지금 서버는 search/grade/genre 필터를 받지 않으니
-  // 일단 프론트에서만 필터링(현재 페이지 items 내부)
-  // 나중에 서버가 필터 지원하면, 이 로직 제거하고
-  // fetch 파라미터로 넘기고 page=1로 재조회하면 됨.
   const filteredItems = useMemo(() => {
     return items.filter((c) => {
       const okSearch = search
@@ -133,7 +109,9 @@ export default function MyGalleryPage() {
     });
   }, [items, search, grade, genre]);
 
-  // 필터 바뀌면 1페이지로(서버 필터 붙이면 여기서 fetch도 같이)
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / PAGE_SIZE));
+  const pagedItems = filteredItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   useEffect(() => {
     setPage(1);
   }, [search, grade, genre]);
@@ -142,7 +120,17 @@ export default function MyGalleryPage() {
     <div className={styles.listWrapper}>
       {isMobile && <MyGalleryMobileHeader title="마이갤러리" onBack={() => router.back()} />}
 
-      {!isMobile && <GradeChips counts={counts} />}
+      {!isMobile && (
+        <GradeChips
+          counts={{
+            total: filteredItems.length,
+            common: filteredItems.filter((c) => c.rarity === 'COMMON').length,
+            rare: filteredItems.filter((c) => c.rarity === 'RARE').length,
+            superRare: filteredItems.filter((c) => c.rarity === 'SUPER RARE').length,
+            legendary: filteredItems.filter((c) => c.rarity === 'LEGENDARY').length,
+          }}
+        />
+      )}
 
       {!isMobile && <div className="mt-[60px] h-px w-full bg-white/20" />}
 
@@ -165,12 +153,12 @@ export default function MyGalleryPage() {
       {loading && <div className="mt-6 text-sm text-white/60">불러오는 중...</div>}
 
       <div className={styles.cardGrid}>
-        {!loading && filteredItems.length === 0 ? (
+        {!loading && pagedItems.length === 0 ? (
           <div className="col-span-full mt-10 text-center text-white/60">
             보유한 포토카드가 없습니다.
           </div>
         ) : (
-          filteredItems.map((card) => <CardOriginal key={card.id} {...card} />)
+          pagedItems.map((card) => <CardOriginal key={card.id} {...card} />)
         )}
       </div>
 

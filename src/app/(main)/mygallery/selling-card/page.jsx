@@ -15,26 +15,50 @@ import styles from './page.module.css';
 
 const PAGE_SIZE = 15;
 
-// ✅ listing(item) -> CardOriginal props로 매핑
-function mapListingToCard(listing) {
-  const pc = listing.photoCard ?? {};
+// ✅ 환경 대응: 기본은 /api 프록시, 없으면 NEXT_PUBLIC_API_BASE_URL로 직접 BE 지정
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? '/api';
+
+function mapMyCardToCard(item) {
+  // listing 래핑 형태(판매등록) or 단순 카드(보유)
+  const listing = item?.listingId ? item : (item?.listing ?? null);
+  const pc = listing?.photoCard ?? item?.photoCard ?? item;
+
+  const status =
+    listing?.status ?? item?.status ?? item?.listingStatus ?? listing?.listingStatus ?? null;
+  const saleType = listing?.saleType ?? item?.saleType ?? item?.sellMethod ?? 'SELL';
+
+  const quantity =
+    listing?.quantity ?? item?.quantity ?? item?.remaining ?? pc?.quantity ?? pc?.remaining ?? 0;
+
+  const pricePerUnit =
+    listing?.pricePerUnit ??
+    item?.pricePerUnit ??
+    item?.price ??
+    pc?.minPrice ??
+    pc?.pricePerUnit ??
+    0;
+
+  const imageUrl =
+    pc?.imageUrl ?? pc?.thumbnailUrl ?? pc?.imageUrlSmall ?? pc?.photoUrl ?? pc?.image ?? '';
+
   return {
-    id: listing.listingId, // listing 기준으로 고유키
-    description: pc.description ?? '',
-    owner: String(listing.sellerUserId ?? ''), // 닉네임 없으니 일단 userId로
-    category: pc.genre ?? 'ALL',
-    rarity: pc.grade ?? 'COMMON',
-    name: pc.name ?? '',
-    imageUrl: pc.imageUrl ?? '',
+    id: listing?.listingId ?? item?.cardId ?? item?.id,
+    description: pc?.description ?? '',
+    owner: String(listing?.sellerUserId ?? item?.ownerUserId ?? item?.ownerId ?? ''),
+    category: pc?.genre ?? pc?.category ?? 'ALL',
+    rarity: pc?.grade ?? pc?.rarity ?? 'COMMON',
+    name: pc?.name ?? '',
+    imageUrl,
+
     selling: {
-      remaining: listing.quantity ?? 0, // ✅ 너 코드가 remaining을 기대해서 연결
-      pricePerUnit: listing.pricePerUnit ?? pc.minPrice ?? 0,
-      status: listing.status,
-      saleType: listing.saleType,
+      remaining: quantity,
+      pricePerUnit,
+      status,
+      saleType,
     },
-    // 필터용
-    sellMethod: listing.saleType ?? 'SELL',
-    isSelling: listing.status === 'ACTIVE',
+
+    sellMethod: saleType,
+    isSelling: status === 'ACTIVE' || status === 'SOLD_OUT' || status === 'ON_SALE',
   };
 }
 
@@ -43,7 +67,8 @@ export default function MyGallerySellingPage() {
   const bp = useBreakpoint();
   const isMobile = bp === 'sm';
 
-  const { setOwnedCount, setLabel, setTitle } = useMyGalleryCount();
+  // ✅ setLabel은 판매 페이지에서 건드리지 않음 (마이갤러리에서 세팅된 라벨 유지)
+  const { setOwnedCount, setTitle } = useMyGalleryCount();
 
   const [search, setSearch] = useState('');
   const [grade, setGrade] = useState('ALL');
@@ -53,71 +78,96 @@ export default function MyGallerySellingPage() {
 
   const [page, setPage] = useState(1);
 
-  // ✅ API 데이터
-  const [allCards, setAllCards] = useState([]); // 누적 로드
+  const [allCards, setAllCards] = useState([]);
   const [nextCursor, setNextCursor] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // ✅ status는 BE가 지원함. (판매중/매진 필터를 status로 맞춰서 요청)
+  // ✅ ALL이면 status를 아예 안 보내고, FE에서 remaining으로 처리
   const statusParam = useMemo(() => {
     if (soldOut === 'SOLD_OUT') return 'SOLD_OUT';
     if (soldOut === 'ON_SALE') return 'ACTIVE';
-    return 'ACTIVE'; // 일단 기본은 ACTIVE로 (전체=ACTIVE+SOLD_OUT은 현재 1번 호출로 불가)
+    return null; // ✅ ALL
   }, [soldOut]);
 
-  const fetchMore = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError('');
+  // ✅ cursorOverride로 리셋 직후 안정화
+  const fetchMore = useCallback(
+    async (cursorOverride) => {
+      try {
+        setLoading(true);
+        setError('');
 
-      const qs = new URLSearchParams();
-      qs.set('limit', '50');
-      qs.set('status', statusParam);
-      qs.set('sortBy', 'reg_date');
-      qs.set('sortOrder', 'DESC');
-      if (nextCursor) qs.set('cursor', String(nextCursor));
+        const qs = new URLSearchParams();
+        qs.set('limit', '50');
+        if (statusParam) qs.set('status', statusParam);
 
-      // ✅ 같은 도메인으로 프록시 되어있다는 가정.
-      // 만약 FE/BE가 다른 도메인이면 NEXT_PUBLIC_API_BASE 붙여야 함(아래 설명 참고)
-      const res = await fetch(`/api/listings?${qs.toString()}`, {
-        credentials: 'include',
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = await res.json();
-      if (!json?.ok) throw new Error(json?.error ?? 'API ok:false');
+        const cursorToUse = cursorOverride !== undefined ? cursorOverride : nextCursor;
+        if (cursorToUse) qs.set('cursor', String(cursorToUse));
 
-      const items = Array.isArray(json.data?.items) ? json.data.items : [];
-      const mapped = items.map(mapListingToCard);
+        const url = `${API_BASE}/users/me/cards?${qs.toString()}`;
+        console.log('[selling] request:', url);
 
-      setAllCards((prev) => {
-        const existed = new Set(prev.map((x) => x.id));
-        const merged = [...prev, ...mapped.filter((m) => !existed.has(m.id))];
-        return merged;
-      });
+        const res = await fetch(url, { credentials: 'include' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      setNextCursor(json.data?.nextCursor ?? null);
-    } catch (e) {
-      setError(e?.message ?? 'failed to load');
-    } finally {
-      setLoading(false);
-    }
-  }, [nextCursor, statusParam]);
+        const json = await res.json();
 
-  // 최초 로드 + soldOut 바뀌면 목록 리셋 후 다시 로드
+        const rawItems = Array.isArray(json?.data?.items)
+          ? json.data.items
+          : Array.isArray(json?.items)
+            ? json.items
+            : Array.isArray(json?.data)
+              ? json.data
+              : [];
+
+        console.log('[selling] response keys:', Object.keys(json ?? {}));
+        console.log('[selling] rawItems length:', rawItems.length);
+        console.log('[selling] rawItems[0]:', rawItems?.[0]);
+
+        // ✅ 판매등록된 것만 (status/ listing 존재 기반으로 최대한 안전하게)
+        const onlySelling = rawItems.filter((x) => {
+          const listing = x?.listingId ? x : x?.listing;
+          const status =
+            listing?.status ?? x?.status ?? x?.listingStatus ?? listing?.listingStatus ?? null;
+
+          const hasListing = Boolean(listing) || status != null;
+          if (!hasListing) return false;
+
+          return status === 'ACTIVE' || status === 'SOLD_OUT' || status === 'ON_SALE';
+        });
+
+        const mapped = onlySelling.map(mapMyCardToCard);
+
+        setAllCards((prev) => {
+          const existed = new Set(prev.map((x) => x.id));
+          return [...prev, ...mapped.filter((m) => !existed.has(m.id))];
+        });
+
+        setNextCursor(json?.data?.nextCursor ?? json?.nextCursor ?? null);
+      } catch (e) {
+        console.error('[selling] fetch error:', e);
+        setError(e?.message ?? 'failed to load');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [nextCursor, statusParam],
+  );
+
+  // soldOut 바뀌면 전체 리셋
   useEffect(() => {
     setAllCards([]);
     setNextCursor(null);
     setPage(1);
   }, [soldOut]);
 
+  // ✅ 리셋 직후 첫 호출은 cursor를 null로 강제
   useEffect(() => {
-    // 리셋 직후 1회 로드
-    fetchMore();
+    fetchMore(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [soldOut]);
 
-  // page가 증가했는데, 현재 데이터가 부족하면 더 가져오기
+  // 페이지 기반으로 추가 로딩
   useEffect(() => {
     const need = page * PAGE_SIZE;
     if (allCards.length < need && nextCursor && !loading) {
@@ -125,15 +175,15 @@ export default function MyGallerySellingPage() {
     }
   }, [page, allCards.length, nextCursor, loading, fetchMore]);
 
-  // ✅ 타이틀/라벨/카운트
+  // ✅ 타이틀/카운트만 갱신 (라벨은 유지)
   useEffect(() => {
     setTitle?.('나의 판매 포토카드');
-    setLabel?.('유디님이 보유한 포토카드');
-    // ⚠️ 지금은 “내 것만”이 아니라 “조회된 전체 리스팅 개수”임
-    setOwnedCount(allCards.length);
-  }, [allCards.length, setOwnedCount, setLabel, setTitle]);
+  }, [setTitle]);
 
-  // ✅ 필터(클라 필터) — 지금 BE가 이 필터들을 지원 안 하니까 FE에서 처리
+  useEffect(() => {
+    setOwnedCount(allCards.length);
+  }, [allCards.length, setOwnedCount]);
+
   const filteredCards = useMemo(() => {
     return allCards.filter((c) => {
       const okSearch = search
@@ -148,7 +198,6 @@ export default function MyGallerySellingPage() {
       const method = c.sellMethod ?? 'SELL';
       const okSellMethod = sellMethod === 'ALL' ? true : method === sellMethod;
 
-      // soldOut는 이미 statusParam으로 1차 필터됨. 그래도 유지
       const remaining = c.selling?.remaining ?? 0;
       const okSoldOut =
         soldOut === 'ALL' ? true : soldOut === 'SOLD_OUT' ? remaining === 0 : remaining > 0;
@@ -171,7 +220,6 @@ export default function MyGallerySellingPage() {
       {!isMobile && (
         <GradeChips
           counts={{
-            // ⚠️ gradeCounts도 "전체 로드된 데이터 기준"임
             total: filteredCards.length,
             common: filteredCards.filter((c) => c.rarity === 'COMMON').length,
             rare: filteredCards.filter((c) => c.rarity === 'RARE').length,
