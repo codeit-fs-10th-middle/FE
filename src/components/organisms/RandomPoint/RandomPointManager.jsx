@@ -7,6 +7,8 @@ import RandomPointResultModal from './RandomPointResultModal';
 const COOLDOWN_SECONDS = 60 * 60;
 const POLL_MS = 30 * 1000;
 
+const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || '').replace(/\/$/, '');
+
 function pad2(n) {
   return String(n).padStart(2, '0');
 }
@@ -52,11 +54,14 @@ export default function RandomPointManager() {
   // 최근 뽑기 시각 기반으로 remaining 계산
   const refreshStatus = useCallback(async () => {
     try {
+      if (!API_BASE) return; // 배포 환경변수 누락 시 조용히 중단
+
       const qs = new URLSearchParams({ userId: String(userId), limit: '1', offset: '0' });
-      const res = await fetch(`/api/point-box-draws/draw-history?${qs.toString()}`, {
+      const res = await fetch(`${API_BASE}/point-box-draws/draw-history?${qs.toString()}`, {
         credentials: 'include',
       });
       if (!res.ok) throw new Error(`status HTTP ${res.status}`);
+
       const json = await res.json();
       if (!json?.ok) throw new Error('status ok:false');
 
@@ -79,7 +84,9 @@ export default function RandomPointManager() {
       const diffSec = Math.floor((now - lastAt.getTime()) / 1000);
       const remain = COOLDOWN_SECONDS - diffSec;
       setRemainSeconds(Math.max(0, remain));
-    } catch {}
+    } catch {
+      // 여기서 에러 로그 안 찍는 이유: 배포에서 콘솔 도배 방지
+    }
   }, [userId]);
 
   // 폴링
@@ -105,7 +112,9 @@ export default function RandomPointManager() {
   const draw = useCallback(async () => {
     setLoadingDraw(true);
     try {
-      const res = await fetch('/api/point-box-draws/draw', {
+      if (!API_BASE) throw new Error('NEXT_PUBLIC_API_BASE_URL is missing');
+
+      const res = await fetch(`${API_BASE}/point-box-draws/draw`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -118,6 +127,7 @@ export default function RandomPointManager() {
       }
 
       if (!res.ok) throw new Error(`draw HTTP ${res.status}`);
+
       const json = await res.json();
       if (!json?.ok) throw new Error('draw ok:false');
 
@@ -135,13 +145,10 @@ export default function RandomPointManager() {
     }
   }, [userId, refreshStatus]);
 
-  const handleConfirm = useCallback(
-    async (boxId) => {
-      if (loadingDraw) return;
-      await draw();
-    },
-    [draw, loadingDraw],
-  );
+  const handleConfirm = useCallback(async () => {
+    if (loadingDraw) return;
+    await draw();
+  }, [draw, loadingDraw]);
 
   const handleCloseSelect = useCallback(() => setSelectOpen(false), []);
   const handleCloseResult = useCallback(() => setResultOpen(false), []);

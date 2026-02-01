@@ -15,6 +15,9 @@ import styles from './page.module.css';
 
 const PAGE_SIZE = 15;
 
+// ✅ NEXT_PUBLIC_API_BASE_URL만 사용 (뒤 슬래시 제거)
+const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || '').replace(/\/$/, '');
+
 /** BE → FE 카드 매핑 */
 function mapMyCardToCard(item) {
   const pc = item?.photoCard ?? item;
@@ -48,14 +51,15 @@ export default function MyGalleryPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  /** ✅ 내 카드 목록 (404 제거 핵심) */
+  /** ✅ 내 카드 목록 */
   const fetchMyCards = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
 
-      // ✅ Netlify 배포 환경: 반드시 /api 프록시로 호출
-      const res = await fetch('/api/users/me/cards', {
+      if (!API_BASE) throw new Error('NEXT_PUBLIC_API_BASE_URL is missing');
+
+      const res = await fetch(`${API_BASE}/users/me/cards`, {
         method: 'GET',
         credentials: 'include',
       });
@@ -63,6 +67,7 @@ export default function MyGalleryPage() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const json = await res.json();
+
       const rawItems = Array.isArray(json?.data?.items)
         ? json.data.items
         : Array.isArray(json?.items)
